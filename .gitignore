@@ -1,0 +1,7 @@
+
+*.pyc
+/.vscode
+/model/cnocr/222
+/pngdata/chrome
+/tmp/test-ResoadbObj
+*.log
