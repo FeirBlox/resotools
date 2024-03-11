@@ -1,0 +1,12 @@
+cnocr==2.2.4.2
+cnstd==1.2.3.5
+loguru==0.7.2
+numpy==1.26.4
+onnx==1.15.0
+onnxruntime-gpu==1.17.1
+opencv-python==4.9.0.80
+PyAutoGUI==0.9.54
+PyGetWindow==0.0.9
+torch==2.2.1
+torchvision==0.17.1
+tqdm==4.66.2
