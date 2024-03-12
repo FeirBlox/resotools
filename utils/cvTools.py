@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-03 17:25:58
 LastEditors: Achetair
-LastEditTime: 2024-03-11 22:22:35
+LastEditTime: 2024-03-11 22:51:24
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -33,7 +33,7 @@ def cvLocatPng(allscreen, tpng):
     # print(max_val)
     if max_val < 0.98:
         raise ChromeLocatePngNotFound
-    log.info("min_val={}, max_val={}, min_loc={}, max_loc={}".format(min_val, max_val, min_loc, max_loc))
+    log.debug("min_val={}, max_val={}, min_loc={}, max_loc={}".format(min_val, max_val, min_loc, max_loc))
     
     # 如果匹配上了，返回图片的位置
     # show img

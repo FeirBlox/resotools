@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-08 23:29:25
 LastEditors: Achetair
-LastEditTime: 2024-03-11 22:21:23
+LastEditTime: 2024-03-11 23:58:49
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -99,10 +99,10 @@ class ABSadbObj():
         try:
             xPoints = cvLocatPng(objshoot_png, pic_path)
         except ChromeLocatePngNotFound as e:
-            log.error("图片 {} 在 图片 {} 中没有发现".format(pic_path, objshoot_png))
+            # log.error("图片 {} 在 图片 {} 中没有发现".format(pic_path, objshoot_png))
             return None
         
-        log.info("{} 的坐标：x={}, y={}".format(picname ,xPoints[0], xPoints[1])) 
+        log.debug("{} 的坐标：x={}, y={}".format(picname ,xPoints[0], xPoints[1])) 
         return xPoints
     
     '''

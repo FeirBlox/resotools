@@ -7,7 +7,6 @@ Description:
 #-*- config:utf-8 -*-
 # python 3.11
 
-
 import stat
 import time
 from tkinter import NO
@@ -26,7 +25,13 @@ class Ocr_tools():
         rec_vocab_path = os.path.join(MODEL_ROOT, "model/cnocr/label_cn.txt")
         self.ocr = CnOcr(det_model_name=det_model_name, rec_model_name=rec_model_name, rec_vocab_fp=rec_vocab_path, det_root=det_root, rec_root=rec_root) 
         self.number_ocr = CnOcr(det_model_name=det_model_name, rec_model_name="en_number_mobile_v2.0", det_root=det_root, rec_root=rec_root, cand_alphabet='0123456789.+%')
-        
+    
+    
+    '''
+    description: 识别图片中的文字
+    img_path：识别的图片
+    charac：匹配的文字
+    '''
     def ocr_characters(self, img_path, charac):
         ocr_list = self.ocr.ocr(img_path)
         for vd in ocr_list:
@@ -142,14 +147,17 @@ class ResoadbObj(ABSadbObj):
                  
     def dispatchOcrCenter(self):
         # 持续性对界面进行文字识别
+        repeat_num = 0
         while(True):
             self.takeTabShoot()
             ocrinfos = self.ocr.ocr_img(self.adb_obj.screenshoot_path)
             findinfos = self.findKeyWord(ocrinfos)
             if findinfos is None:
                 self.dispatchImgCenter()
-                log.info("没有找到关键字，休息。。。。。")
+                if repeat_num == 0:
+                    log.info("待机中，(+.+)(-.-)(_ _) ..zzZZ")
                 time.sleep(5)
+                repeat_num += 1
                 continue
             else:
                 nkey = findinfos["nkey"]
@@ -163,30 +171,36 @@ class ResoadbObj(ABSadbObj):
                     log.info("执行[{}]的操作[{}]".format(nkey, self.text_funcaction_dict[nkey].__name__))
                     self.text_funcaction_dict[nkey]()
                     
-    def zidongxunhang(self, num=5):
+    def zidongxunhang(self, num=3):
         # 自动巡航的状态
         log.info("列车进入自动巡航的状态！")
         repeat_num = 0
         while(True):
             self.takeTabShoot()
-            
+            time.sleep(1)
             # 检测弹丸加速
-            state = self.clickPictureEvent("jiasudanwan.png", name="加速弹丸", num=2)
-            if state is None:
-                # log.info("没有检测到加速弹丸，可能会发生遇袭事件")
-                log.info("亲，列车正在加速中~~~~~~~~")
+            state = self.locateTpicture("jiasudanwan.png")
+            if state is not None:
+                self.adb_obj.clickPosition(state)
+                log.info("检测到【弹丸加速】，点击{}".format(state))
+                time.sleep(3)
+                if repeat_num == 0: 
+                    log.info("亲，列车正在加速中~～(￣▽￣～)(～￣▽￣)～~")
+                else:
+                    repeat_num += 1
+                    continue
             else:
-                repeat_num = 0
+                # 检测列车到站
                 state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "列车已经到站")
                 if state is not None:
                     log.info("列车已经到站，请下车！！")
                     return
-                continue
+                
             
             state = self.clickPictureEvent("huweiduiyingji.png", name="护卫队袭击", num=1)
             if state is not None:
-                repeat_num = 0
                 log.info("(ｷ｀ﾟДﾟ´)!! 被野怪袭击！！！干他！！！")
+                repeat_num = 0
                 self.waitMissionEnd()
             repeat_num += 1
             if repeat_num >=num:
@@ -207,22 +221,24 @@ class ResoadbObj(ABSadbObj):
                 break
         repeat_count = 0
         while(True):
+            time.sleep(1)
             self.takeTabShoot()
             state = self.locateTpicture("fighting.png")
             if state is not None:
-                log.info("游戏还没有结束请等待......")
-                time.sleep(10)
+                if repeat_count == 0:
+                    log.info("游戏还没有结束请等待......")
+                time.sleep(5)
                 repeat_count += 1
                 continue
             
-            break
-        endp = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "下一步")
-        if endp is not None:
-            repeat_count = 0
-            log.info("检测到[{}], 点击{}".format(endp[0], endp[1]))
-            self.adb_obj.clickPosition(endp[1])       
-        else:
-            log.info("出现意外退出循环")     
+            endp = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "下一步")
+            if endp is not None:
+                repeat_count = 0
+                log.info("检测到[{}], 点击{}".format(endp[0], endp[1]))
+                self.adb_obj.clickPosition(endp[1]) 
+                break 
+
+                # log.info("出现意外退出循环")     
         log.info("作战结束")
                     
     def dispatchImgCenter(self):
@@ -258,8 +274,10 @@ class ResoadbObj(ABSadbObj):
     
 if __name__ == "__main__":
     A = ResoadbObj()
-    A.setAdbInfo("127.0.0.1", "16384", "D:/work/resotools/connection/adb.exe", "D:/work/resotools/tmp" )
-    A.dispatchOcrCenter()
+    A.setAdbInfo("127.0.0.1", "16384", "connection/adb.exe", "tmp" )
+    # A.dispatchOcrCenter()
+    A.takeTabShoot()
+    rrr = A.ocr.ocr_characters(A.adb_obj.screenshoot_path, "下一步")
     # A.locateTpicture("zidongxunhang.png")
     # print(A.locateTpicture.__name__)
     # A.takeTestTabShoot("xiaohongdian.png")
@@ -268,4 +286,4 @@ if __name__ == "__main__":
     # B = Ocr_tools()
     # # rrr = B.ocr.ocr(img_path)
     # rrr = B.ocr_characters(img_path, "进入游戏")
-    # print(rrr)
+    print(rrr)
