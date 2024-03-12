@@ -9,6 +9,7 @@ Description:
 
 import stat
 import time
+import datetime
 from tkinter import NO
 import numpy as np
 from cnocr import CnOcr
@@ -142,7 +143,8 @@ class ResoadbObj(ABSadbObj):
         }
         self.img_funcact_dict={
             "fighting.png":self.waitMissionEnd,
-            
+            "huweiduiyingji.png":self.zidongxunhang,
+            "fighting.png":self.waitMissionEnd,
         }
                  
     def dispatchOcrCenter(self):
@@ -171,37 +173,45 @@ class ResoadbObj(ABSadbObj):
                     log.info("执行[{}]的操作[{}]".format(nkey, self.text_funcaction_dict[nkey].__name__))
                     self.text_funcaction_dict[nkey]()
                     
-    def zidongxunhang(self, num=3):
+    def zidongxunhang(self, num=5):
         # 自动巡航的状态
         log.info("列车进入自动巡航的状态！")
+        
         repeat_num = 0
+        clickDanWan_num = 0   
+        accStartTime = datetime.datetime(1970,1,1,1,1,1)
+         
         while(True):
             self.takeTabShoot()
             time.sleep(1)
-            # 检测弹丸加速
-            state = self.locateTpicture("jiasudanwan.png")
+            state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "自动巡航")
+            nowTime = datetime.datetime.now()  
             if state is not None:
-                self.adb_obj.clickPosition(state)
-                log.info("检测到【弹丸加速】，点击{}".format(state))
-                time.sleep(3)
-                if repeat_num == 0: 
-                    log.info("亲，列车正在加速中~～(￣▽￣～)(～￣▽￣)～~")
+                # 还在自动巡航中
+                repeat_num = 0
+                if (not clickDanWan_num) and ((nowTime - accStartTime).seconds >= 20):
+                    state = self.clickPictureEvent("jiasudanwan.png", name="弹丸加速", num=1)
+                    # log.info("检测到【弹丸加速】，点击{}".format(state))
+                    time.sleep(5)
+                    clickDanWan_num += 1
                 else:
-                    repeat_num += 1
+                    clickDanWan_num = 0
+                    log.info("亲，列车正在加速中~～(￣▽￣～)(～￣▽￣)～~")
+                    time.sleep(5)
                     continue
-            else:
-                # 检测列车到站
-                state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "列车已经到站")
-                if state is not None:
-                    log.info("列车已经到站，请下车！！")
-                    return
                 
-            
+            clickDanWan_num = 0
             state = self.clickPictureEvent("huweiduiyingji.png", name="护卫队袭击", num=1)
             if state is not None:
                 log.info("(ｷ｀ﾟДﾟ´)!! 被野怪袭击！！！干他！！！")
                 repeat_num = 0
                 self.waitMissionEnd()
+
+            state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "列车已经到站")
+            if state is not None:
+                log.info("列车已经到站，请下车！！")
+                return
+                
             repeat_num += 1
             if repeat_num >=num:
                 state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "自动巡航")
@@ -210,25 +220,26 @@ class ResoadbObj(ABSadbObj):
                     return
                 repeat_num = 0
                 
-    def waitMissionEnd(self):
+    def waitMissionEnd(self,num=5):
         # self.clickPictureEvent("zuozhan.png", "作战")
+        ffight = False
+       
         log.info("开始作战！！！")
-        for i in range(2):
-            state = self.clickPictureEvent("kaishizuozhan.png", "开始作战", num=3)
-            time.sleep(2)
-            if state is not None:
-                time.sleep(7)
-                break
+
         repeat_count = 0
         while(True):
             time.sleep(1)
             self.takeTabShoot()
+            if not ffight:
+                state = self.clickPictureEvent("kaishizuozhan.png", "开始作战", num=2)
+                ffight = True
+                time.sleep(7)
+                
             state = self.locateTpicture("fighting.png")
             if state is not None:
-                if repeat_count == 0:
-                    log.info("游戏还没有结束请等待......")
+                log.info("游戏还没有结束请等待......")
+                ffight = True
                 time.sleep(5)
-                repeat_count += 1
                 continue
             
             endp = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "下一步")
@@ -237,8 +248,10 @@ class ResoadbObj(ABSadbObj):
                 log.info("检测到[{}], 点击{}".format(endp[0], endp[1]))
                 self.adb_obj.clickPosition(endp[1]) 
                 break 
-
-                # log.info("出现意外退出循环")     
+            repeat_count += 1
+            if repeat_count >= num:
+                log.info("出现意外退出循环")   
+                break
         log.info("作战结束")
                     
     def dispatchImgCenter(self):
@@ -266,7 +279,6 @@ class ResoadbObj(ABSadbObj):
                     }
         return None
                     
-    
     # def enterGame(self):
         
 
