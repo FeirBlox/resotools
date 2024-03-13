@@ -197,8 +197,8 @@ class ResoadbObj(ABSadbObj):
                 else:
                     clickDanWan_num = 0
                     log.info("亲，列车正在加速中~～(￣▽￣～)(～￣▽￣)～~")
-                    time.sleep(5)
-                    continue
+                    time.sleep(3)
+                continue
                 
             clickDanWan_num = 0
             state = self.clickPictureEvent("huweiduiyingji.png", name="护卫队袭击", num=1)
@@ -220,12 +220,42 @@ class ResoadbObj(ABSadbObj):
                     return
                 repeat_num = 0
                 
+    def fightFloatTree(self, funm=0):
+        if funm:
+            log.info("混响浮标战斗次数：{}".format(funm))
+        else:
+            log.info("混响浮标持续战斗..........")
+        repeat_count = 0
+        while(True):  
+            time.sleep(1)
+            self.takeTabShoot()
+            state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "开始作战")
+            if state is not None:
+                self.adb_obj.clickPosition(state[1])
+                time.sleep(2)
+            self.waitMissionEnd()
+            repeat_count += 1
+            log.info("混响浮标第{}次战斗结束。".format(repeat_count))
+            time.sleep(3)
+            if repeat_count == funm:
+                break
+        
+    def strengthLess(self):
+        state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "澄明度不足")
+        if state is None:
+            log.error("澄明度充足，出现了误报")
+            return
+        log.info("澄明度不足,将补充一次...")
+        state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "确认")
+        if state is None:
+            pass
+        # 先尝试棒棒糖
+        pass
+                
     def waitMissionEnd(self,num=5):
         # self.clickPictureEvent("zuozhan.png", "作战")
         ffight = False
-       
         log.info("开始作战！！！")
-
         repeat_count = 0
         while(True):
             time.sleep(1)
@@ -289,7 +319,7 @@ if __name__ == "__main__":
     A.setAdbInfo("127.0.0.1", "16384", "connection/adb.exe", "tmp" )
     # A.dispatchOcrCenter()
     A.takeTabShoot()
-    rrr = A.ocr.ocr_characters(A.adb_obj.screenshoot_path, "下一步")
+    # rrr = A.ocr.ocr_characters(A.adb_obj.screenshoot_path, "下一步")
     # A.locateTpicture("zidongxunhang.png")
     # print(A.locateTpicture.__name__)
     # A.takeTestTabShoot("xiaohongdian.png")
@@ -298,4 +328,4 @@ if __name__ == "__main__":
     # B = Ocr_tools()
     # # rrr = B.ocr.ocr(img_path)
     # rrr = B.ocr_characters(img_path, "进入游戏")
-    print(rrr)
+    # print(rrr)
