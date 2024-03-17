@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-08 23:29:25
 LastEditors: Achetair
-LastEditTime: 2024-03-12 18:08:44
+LastEditTime: 2024-03-17 21:43:08
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -90,6 +90,15 @@ class ABSadbObj():
         tpath = os.path.join(tpath_dir, nname)
         makedirs(tpath_dir)
         os.rename(self.adb_obj.screenshoot_path, tpath)
+        
+    def cutPartPic(self, shapeA, picname=""):
+        crop_file_path = crop_image(shapeA, self.adb_obj.screenshoot_path)
+        if picname != "":
+            tmp_pth = os.path.join(self.tmpstore_path, "{}.png".format(picname))
+            copy_and_rename_file(crop_file_path, tmp_pth)
+            crop_file_path = tmp_pth
+        return crop_file_path
+        
         
     def locateTpicture(self, picname):
         assert self.store_pic_path != ""

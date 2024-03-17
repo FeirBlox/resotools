@@ -7,47 +7,15 @@ Description:
 #-*- config:utf-8 -*-
 # python 3.11
 
-import stat
 import time
 import datetime
 from tkinter import NO
 import numpy as np
 from cnocr import CnOcr
 
-from resotools.game.ABSObj import*
-
-MODEL_ROOT = "D:/work/resotools"
-
-class Ocr_tools():
-    def __init__(self,det_model_name="ch_PP-OCRv3_det", rec_model_name= "densenet_lite_114-fc", det_root="model/cnstd", rec_root="model/cnocr", number=False, start=True) -> None:
-        det_root, rec_root = os.path.join(MODEL_ROOT, det_root), os.path.join(MODEL_ROOT, rec_root)
-        
-        print("det_root: {}, rec_root:{}".format(det_root, rec_root))
-        rec_vocab_path = os.path.join(MODEL_ROOT, "model/cnocr/label_cn.txt")
-        self.ocr = CnOcr(det_model_name=det_model_name, rec_model_name=rec_model_name, rec_vocab_fp=rec_vocab_path, det_root=det_root, rec_root=rec_root) 
-        self.number_ocr = CnOcr(det_model_name=det_model_name, rec_model_name="en_number_mobile_v2.0", det_root=det_root, rec_root=rec_root, cand_alphabet='0123456789.+%')
-    
-    
-    '''
-    description: 识别图片中的文字
-    img_path：识别的图片
-    charac：匹配的文字
-    '''
-    def ocr_characters(self, img_path, charac):
-        ocr_list = self.ocr.ocr(img_path)
-        for vd in ocr_list:
-            msg = vd["text"]
-            if charac in msg:
-                return (msg, self.ocr_center_pos(vd["position"]))
-        return None
-    
-    def ocr_img(self, img_path):
-        return self.ocr.ocr(img_path)
-    
-    def ocr_center_pos(self, ocr_array):
-        position = np.mean(ocr_array, axis=0)
-        return position.tolist()
-
+from resotools.game.ABSObj import *
+from resotools.utils.cvTools import *
+from resotools.utils.ocrtools import Ocr_tools
 
 
 class ResoObj(ABSobj):
@@ -136,6 +104,16 @@ class ResoadbObj(ABSadbObj):
         self.moudle_name = "ResoadbObj"
         self.store_pic_path = "D:/work/resotools/pngdata/leisuonasi"
         self.ocr = Ocr_tools()
+        
+        self.pos_data = {
+            "自动战斗":[311, 32, 389, 98],
+            "自动巡航":[920.0, 164.0, 1040.0, 205.0],
+            "弹丸图标":[1588, 978, 1640, 1027],
+            "弹丸数量":[1585, 1036, 1645, 1058],
+        }
+        self.gameFlag = {}
+        self.__gameFlagRefresh()
+        
         self.text_funcaction_dict = {
             "进入游戏":"click",
             "自动巡航":self.zidongxunhang,
@@ -146,6 +124,14 @@ class ResoadbObj(ABSadbObj):
             "huweiduiyingji.png":self.zidongxunhang,
             "fighting.png":self.waitMissionEnd,
         }
+    
+    def __gameFlagRefresh(self):
+        for k,v in self.pos_data.items():
+            # if k in self.gameFlag:
+            #     continue
+            # else:
+            #     self.gameFlag[k] = False
+            self.gameFlag[k] = False
                  
     def dispatchOcrCenter(self):
         # 持续性对界面进行文字识别
@@ -177,30 +163,37 @@ class ResoadbObj(ABSadbObj):
         # 自动巡航的状态
         log.info("列车进入自动巡航的状态！")
         
-        repeat_num = 0
-        clickDanWan_num = 0   
-        accStartTime = datetime.datetime(1970,1,1,1,1,1)
+        repeat_num = 0 
          
         while(True):
             self.takeTabShoot()
             time.sleep(1)
-            state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "自动巡航")
-            nowTime = datetime.datetime.now()  
+            
+            xm_name = "自动巡航"
+            part_pic = self.cutPartPic(self.pos_data[xm_name])
+            state = self.ocr.ocr_characters(part_pic, xm_name)
+            # state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "自动巡航")
+
             if state is not None:
                 # 还在自动巡航中
                 repeat_num = 0
-                if (not clickDanWan_num) and ((nowTime - accStartTime).seconds >= 20):
-                    state = self.clickPictureEvent("jiasudanwan.png", name="弹丸加速", num=1)
-                    # log.info("检测到【弹丸加速】，点击{}".format(state))
-                    time.sleep(5)
-                    clickDanWan_num += 1
+                xm_name = "弹丸数量"
+                self.takeTabShoot()
+                part_pic = self.cutPartPic(self.pos_data[xm_name])
+                state = self.ocr.ocr_number(part_pic)
+                if state is None:
+                    # 正在加速中
+                    state = self.ocr.ocr_characters(part_pic, "加速")
+                    if state is not None:
+                        log.info("亲，列车正在加速中~～(￣▽￣～)(～￣▽￣)～~")
+                        time.sleep(3)
+                        continue
                 else:
-                    clickDanWan_num = 0
-                    log.info("亲，列车正在加速中~～(￣▽￣～)(～￣▽￣)～~")
-                    time.sleep(3)
-                continue
-                
-            clickDanWan_num = 0
+                    # 点击加速弹丸
+                    self.clickPictureEvent("jiasudanwan.png",name="加速弹丸", num=1)
+                    log.info("加速弹丸数量剩余：{}/6".format(state))
+                    continue
+                    
             state = self.clickPictureEvent("huweiduiyingji.png", name="护卫队袭击", num=1)
             if state is not None:
                 log.info("(ｷ｀ﾟДﾟ´)!! 被野怪袭击！！！干他！！！")
@@ -263,7 +256,18 @@ class ResoadbObj(ABSadbObj):
             if not ffight:
                 state = self.clickPictureEvent("kaishizuozhan.png", "开始作战", num=2)
                 ffight = True
-                time.sleep(7)
+                time.sleep(8)
+                
+            # 检测自动战斗是否开启
+            if not self.gameFlag["自动战斗"]:
+                self.locateTpicture("autofighttagwhite.png")
+                # cutfile = self.cutPartPic(self.pos_data["自动战斗"])
+                # # 检测灰度
+                # color = detect_color(cutfile)
+                # if color == "grey":
+                #     self.adb_obj.clickPosition(calcenterpos(self.pos_data["自动战斗"]))
+                # log.info("自动战斗已经开启")
+                # self.gameFlag["自动战斗"] = True
                 
             state = self.locateTpicture("fighting.png")
             if state is not None:
@@ -271,7 +275,7 @@ class ResoadbObj(ABSadbObj):
                 ffight = True
                 time.sleep(5)
                 continue
-            
+                
             endp = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "下一步")
             if endp is not None:
                 repeat_count = 0

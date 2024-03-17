@@ -1,3 +1,9 @@
+'''
+Author: Achetair
+Date: 2024-03-03 17:03:45
+LastEditors: Achetair
+Description: 
+'''
 #-*- config:utf-8 -*-
 # python 3.11
 import os
@@ -9,6 +15,7 @@ import inspect
 import time
 import gc
 import datetime
+import shutil
 
 def async_raise(tid, exctype):
    """raises the exception, performs cleanup if needed"""
@@ -26,6 +33,18 @@ def async_raise(tid, exctype):
       
 def stop_thread(thread):
    async_raise(thread.ident, SystemExit)
+   
+def copy_and_rename_file(original_filename, new_filename):
+    shutil.copyfile(original_filename, new_filename)
+   
+def dropfixFileName(filep, fix="_cropped"):
+    # 分割文件名和扩展名
+    filename, extension = os.path.splitext(filep)
+    # 构造新的文件名
+    new_filename = filename + fix + extension
+    # 重命名文件
+    # os.rename(filep, new_filename)
+    return new_filename    
 
 class threadsManager():
     def __init__(self) -> None:
@@ -46,7 +65,7 @@ class threadsManager():
             log.info("终止进程 {} ".format(k))
             
     def killTthread(self, rname):
-        async_raise(self.threadsinfo[rname])
+        stop_thread(self.threadsinfo[rname])
         log.info("终止进程 {} ".format(rname))
 
 

@@ -2,7 +2,7 @@
  * @Author: Achetair
  * @Date: 2024-03-11 22:12:32
  * @LastEditors: Achetair
- * @LastEditTime: 2024-03-12 17:56:23
+ * @LastEditTime: 2024-03-15 01:40:21
  * @Description: 
 -->
 # resotools
@@ -22,4 +22,6 @@
 
 # 打包
 
-* python -m nuitka mainApp.py --follow-imports --standalone
+nuitka --mingw64 --windows-disable-console --standalone --enable-plugin=tk-inter mainApp.py
+
+nuitka --mingw64 --windows-disable-console --enable-plugin=tk-inter ResoToolsUI.py

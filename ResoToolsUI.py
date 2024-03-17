@@ -165,7 +165,7 @@ class WinMan():
     def fgtHundunXB(self, evt):
         if evt.num == 1:
             if self.leftclick_fgtHundunXB_num % 2 == 0:
-                text = self.tk_input_fgthdxbNum.get()
+                text = self.winui.tk_input_fgthdxbNum.get()
                 fnum = self.convert_to_number(text)
                 self.threadObjs.startNewThread(self.resoobj.fightFloatTree, "hundunxb", fnum)
             else:
@@ -181,7 +181,7 @@ class WinMan():
         
         # 将日志和文本框绑定
         handler = TkinterLogHandler(self.winui.tk_text_textLog)
-        log.add(handler, level="DEBUG")
+        log.add(handler, level="INFO")
         
     def start(self):
         self.__event_bind()

@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-08 22:12:54
 LastEditors: Achetair
-LastEditTime: 2024-03-09 01:03:11
+LastEditTime: 2024-03-17 19:50:51
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -36,9 +36,20 @@ class ADB():
     def setModuleName(self, module_name):
         self.module_name = module_name
         
+    # 获取分辨率
+    def getScreenSize(self):
+        shell_cmd = [self.adb_path, "shell ", "wm", "size"]
+        result = run(shell_cmd,capture_output=True, text=True)
+        output = result.stdout.strip()
+        resolution_str = output.split()[-1]  # 获取分辨率信息
+        width_str, height_str = resolution_str.split('x')  # 分割长和宽
+        width = int(width_str)
+        height = int(height_str)
+        return width, height
+        
     def __connect(self):
         shell_cmd = [self.adb_path, "connect", self.ip_addr]
-        print(shell_cmd)
+        # print(shell_cmd)
         result = run(shell_cmd, shell=True, capture_output=True)
         return result.stdout
     
