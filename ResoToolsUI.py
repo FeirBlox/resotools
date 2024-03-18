@@ -38,9 +38,15 @@ class WinGUI(Tk):
         self.tk_button_fgtHundunXB = self.__tk_button_fgtHundunXB(self)
         self.tk_input_fgthdxbNum = self.__tk_input_fgthdxbNum(self)
         self.tk_label_ltpr9q0z = self.__tk_label_ltpr9q0z(self)
-        
+        self.tk_button_tieanju = self.__tk_button_tieanju(self)
+        self.tk_label_ltx3p6yw = self.__tk_label_ltx3p6yw(self)
+        self.tk_button_autorunbusiness = self.__tk_button_autorunbusiness(self)
+        self.tk_label_ltx3qkfa = self.__tk_label_ltx3qkfa(self)
+        self.tk_input_ltx3qygc = self.__tk_input_ltx3qygc(self)
+        self.tk_label_ltx3rfde = self.__tk_label_ltx3rfde(self)
+        self.tk_input_ltx3s9jb = self.__tk_input_ltx3s9jb(self)
     def __win(self):
-        self.title("Tkinter布局助手")
+        self.title("Reso Tools")
         # 设置窗口大小、居中
         width = 800
         height = 500
@@ -98,32 +104,60 @@ class WinGUI(Tk):
         return label
     def __tk_button_btnAutoStart(self,parent):
         btn = Button(parent, text="开启自动巡航", takefocus=False,)
-        btn.place(x=0, y=60, width=156, height=30)
+        btn.place(x=0, y=27, width=156, height=30)
         return btn
     def __tk_label_ltpr4mos(self,parent):
         label = Label(parent,text="--------------------------------------------",anchor="center", )
-        label.place(x=0, y=130, width=212, height=30)
+        label.place(x=0, y=104, width=212, height=30)
         return label
     def __tk_label_ltpr54it(self,parent):
         label = Label(parent,text="--------------------------------------------",anchor="center", )
-        label.place(x=0, y=33, width=212, height=30)
+        label.place(x=0, y=0, width=212, height=30)
         return label
     def __tk_button_btnAutoStop(self,parent):
         btn = Button(parent, text="关闭自动巡航", takefocus=False,)
-        btn.place(x=0, y=100, width=155, height=30)
+        btn.place(x=0, y=67, width=155, height=30)
         return btn
     def __tk_button_fgtHundunXB(self,parent):
         btn = Button(parent, text="混沌信标挑战", takefocus=False,)
-        btn.place(x=270, y=20, width=88, height=30)
+        btn.place(x=275, y=0, width=80, height=30)
         return btn
     def __tk_input_fgthdxbNum(self,parent):
         ipt = Entry(parent, )
-        ipt.place(x=371, y=20, width=95, height=30)
+        ipt.place(x=371, y=0, width=95, height=30)
         return ipt
     def __tk_label_ltpr9q0z(self,parent):
         label = Label(parent,text="次数",anchor="center", )
-        label.place(x=476, y=21, width=50, height=30)
+        label.place(x=476, y=0, width=50, height=30)
         return label
+    def __tk_button_tieanju(self,parent):
+        btn = Button(parent, text="铁安局", takefocus=False,)
+        btn.place(x=275, y=40, width=80, height=30)
+        return btn
+    def __tk_label_ltx3p6yw(self,parent):
+        label = Label(parent,text="--------------------------------------------",anchor="center", )
+        label.place(x=275, y=62, width=212, height=30)
+        return label
+    def __tk_button_autorunbusiness(self,parent):
+        btn = Button(parent, text="自动跑商", takefocus=False,)
+        btn.place(x=275, y=100, width=80, height=30)
+        return btn
+    def __tk_label_ltx3qkfa(self,parent):
+        label = Label(parent,text="始发地：",anchor="center", )
+        label.place(x=360, y=104, width=50, height=30)
+        return label
+    def __tk_input_ltx3qygc(self,parent):
+        ipt = Entry(parent, )
+        ipt.place(x=420, y=104, width=117, height=30)
+        return ipt
+    def __tk_label_ltx3rfde(self,parent):
+        label = Label(parent,text="目的地：",anchor="center", )
+        label.place(x=360, y=140, width=50, height=30)
+        return label
+    def __tk_input_ltx3s9jb(self,parent):
+        ipt = Entry(parent, )
+        ipt.place(x=420, y=140, width=117, height=30)
+        return ipt
     
 class WinMan():
     def __init__(self):        
@@ -153,7 +187,7 @@ class WinMan():
         
     def btnAutoStart(self, evt):
         if evt.num == 1:
-            self.threadObjs.startNewThread(self.resoobj.dispatchOcrCenter, "autoxunhang")
+            self.threadObjs.startNewThread(self.resoobj.autoDetectExcute, "autoxunhang")
             self.winui.tk_button_btnAutoStart.config(state=DISABLED)
             self.winui.tk_button_btnAutoStop.config(state=NORMAL)
         

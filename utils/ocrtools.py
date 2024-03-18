@@ -7,6 +7,7 @@ Description:
 import os
 import numpy as np
 from cnocr import CnOcr
+from resotools.utils.CommonUtils import *
 from resotools.utils.UserLog import obj_log as log
 
 MODEL_ROOT = "D:/work/resotools"
@@ -27,7 +28,7 @@ class Ocr_tools():
     charac：匹配的文字
     '''
     def ocr_characters(self, img_path, charac):
-        ocr_list = self.ocr.ocr(img_path)
+        ocr_list = self.ocr_img(img_path)
         for vd in ocr_list:
             msg = vd["text"]
             if charac in msg:
@@ -58,6 +59,24 @@ class Ocr_tools():
         except ValueError:
             return None
         
+    def ocr_mutitext(self, img_path, kwords:list):
+        ocr_list = self.ocr_img(img_path)
+        ret = {}
+        for word in kwords:
+            for vd in ocr_list:
+                msg = vd["text"]
+                if word in msg:
+                    pos = vd["position"]
+                    log.debug("发现文字 : {}, 轮廓为：{}".format(msg, self.__extract_shape(pos)))
+                    ret[word] = {
+                        "text":msg,
+                        "pos":self.ocr_center_pos(pos)
+                    }
+                    break
+        return ret
+                              
+                
+        
         
     def ocr_img(self, img_path):
         return self.ocr.ocr(img_path)
@@ -71,7 +90,6 @@ class Ocr_tools():
 if __name__ == "__main__":
     ooo = Ocr_tools()
     # pp = r"D:\work\resotools\tmp\test-ResoadbObj\daodamudidi_cropped.png"
-    pp = r"D:\work\resotools\tmp\test-ResoadbObj\liechexingshi_cropped.png"
-    # rr = ooo.ocr_characters(pp, "自动巡航")
-    rr = ooo.number_ocr.ocr_for_single_line(pp)
-    print(rr)
+    # pp = r"D:\work\resotools\tmp\test-ResoadbObj\liechexingshi.png"
+    # rr = ooo.number_ocr.ocr_for_single_line(pp)
+    # print(rr)

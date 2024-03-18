@@ -104,26 +104,34 @@ class ResoadbObj(ABSadbObj):
         self.moudle_name = "ResoadbObj"
         self.store_pic_path = "D:/work/resotools/pngdata/leisuonasi"
         self.ocr = Ocr_tools()
-        
+        self.__classValueInit()
+    
+    def __classValueInit(self):
         self.pos_data = {
             "自动战斗":[311, 32, 389, 98],
             "自动巡航":[920.0, 164.0, 1040.0, 205.0],
-            "弹丸图标":[1588, 978, 1640, 1027],
+            # "弹丸图标":[1588, 978, 1640, 1027],
             "弹丸数量":[1585, 1036, 1645, 1058],
         }
-        self.gameFlag = {}
+        self.gameFlag = {
+            "自动战斗":False,
+        }
         self.__gameFlagRefresh()
         
         self.text_funcaction_dict = {
             "进入游戏":"click",
-            "自动巡航":self.zidongxunhang,
+            "自动巡航":self.autoCruise,
             "下一步":"click",
         }
         self.img_funcact_dict={
             "fighting.png":self.waitMissionEnd,
-            "huweiduiyingji.png":self.zidongxunhang,
+            "huweiduiyingji.png":self.autoCruise,
             "fighting.png":self.waitMissionEnd,
-        }
+        }       
+        
+        # 一些类的信息
+        self.city_list = ["曼德矿场","阿妮塔能源研究所"]
+        self.tmpcityDes = "" # 临时城市目的地
     
     def __gameFlagRefresh(self):
         for k,v in self.pos_data.items():
@@ -133,7 +141,7 @@ class ResoadbObj(ABSadbObj):
             #     self.gameFlag[k] = False
             self.gameFlag[k] = False
                  
-    def dispatchOcrCenter(self):
+    def autoDetectExcute(self):
         # 持续性对界面进行文字识别
         repeat_num = 0
         while(True):
@@ -159,16 +167,38 @@ class ResoadbObj(ABSadbObj):
                     log.info("执行[{}]的操作[{}]".format(nkey, self.text_funcaction_dict[nkey].__name__))
                     self.text_funcaction_dict[nkey]()
                     
-    def zidongxunhang(self, num=5):
+    def autoRunningBusiness(self, city1, city2):
+        pass
+    
+    # 自动巡航   
+    def autoCruise(self, num=5):
         # 自动巡航的状态
         log.info("列车进入自动巡航的状态！")
-        
         repeat_num = 0 
+        isDisCertain = False
+        distance = 1000
+        destination = ""
          
         while(True):
             self.takeTabShoot()
             time.sleep(1)
             
+            # 获取剩余里程，目的地
+            state = self.ocr.ocr_mutitext(self.adb_obj.screenshoot_path, ["剩余行程", "目的地"])
+
+            if state is not None:
+                if state.get("剩余行程") is not None:
+                    tmpdis = state["剩余行程"]["text"]
+                    tdis = getTextNumber(tmpdis)
+                    distance = min(tdis, distance)
+                # print("距离")
+                if not isDisCertain and state.get("目的地") is not None:
+                    destination = state["目的地"]["text"].split("：")[-1]
+                    if destination in self.city_list:
+                        self.tmpcityDes = destination
+                        isDisCertain = True
+                log.info("距离[{}]还有[{}]km".format(destination, distance))
+                
             xm_name = "自动巡航"
             part_pic = self.cutPartPic(self.pos_data[xm_name])
             state = self.ocr.ocr_characters(part_pic, xm_name)
@@ -190,7 +220,10 @@ class ResoadbObj(ABSadbObj):
                         continue
                 else:
                     # 点击加速弹丸
-                    self.clickPictureEvent("jiasudanwan.png",name="加速弹丸", num=1)
+                    if distance >= 50:
+                        self.clickPictureEvent("jiasudanwan.png",name="加速弹丸", num=1)
+                    else:
+                        log.info("距离[{}]太近，停止使用加速弹丸".format(destination))
                     log.info("加速弹丸数量剩余：{}/6".format(state))
                     continue
                     
@@ -244,6 +277,19 @@ class ResoadbObj(ABSadbObj):
             pass
         # 先尝试棒棒糖
         pass
+    
+    def stepToCity(self):
+        # 通过图标进入城市
+        self.takeTabShoot()
+        state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "列车已经到站")
+        if state is None:
+            return 
+        state = self.clickPictureEvent("jinruzhandian.png", name="进入站点")
+        time.sleep(4)
+        state = self.clickPictureEvent("fangwenchengshi.png", name="访问城市")
+        # assert self.tmpcityDes != ""
+        log.info("进入城市：【{}】".format(self.tmpcityDes))
+        
                 
     def waitMissionEnd(self,num=5):
         # self.clickPictureEvent("zuozhan.png", "作战")
@@ -258,19 +304,18 @@ class ResoadbObj(ABSadbObj):
                 ffight = True
                 time.sleep(8)
                 
-            # 检测自动战斗是否开启
-            if not self.gameFlag["自动战斗"]:
-                self.locateTpicture("autofighttagwhite.png")
-                # cutfile = self.cutPartPic(self.pos_data["自动战斗"])
-                # # 检测灰度
-                # color = detect_color(cutfile)
-                # if color == "grey":
-                #     self.adb_obj.clickPosition(calcenterpos(self.pos_data["自动战斗"]))
-                # log.info("自动战斗已经开启")
-                # self.gameFlag["自动战斗"] = True
-                
             state = self.locateTpicture("fighting.png")
             if state is not None:
+                # 检测自动战斗是否开启
+                if not self.gameFlag["自动战斗"]:
+                    # self.locateTpicture("autofighttagwhite.png")
+                    cutfile = self.cutPartPic(self.pos_data["自动战斗"])
+                    # 检测灰度
+                    color = detect_color(cutfile)
+                    if color == "grey":
+                        self.adb_obj.clickPosition(calcenterpos(self.pos_data["自动战斗"]))
+                    log.info("自动战斗已经开启")
+                    self.gameFlag["自动战斗"] = True                
                 log.info("游戏还没有结束请等待......")
                 ffight = True
                 time.sleep(5)
@@ -282,6 +327,7 @@ class ResoadbObj(ABSadbObj):
                 log.info("检测到[{}], 点击{}".format(endp[0], endp[1]))
                 self.adb_obj.clickPosition(endp[1]) 
                 break 
+            
             repeat_count += 1
             if repeat_count >= num:
                 log.info("出现意外退出循环")   

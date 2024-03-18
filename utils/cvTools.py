@@ -123,13 +123,13 @@ if __name__ == "__main__":
     
     
     # 裁剪图片
-    # imp_path = r"D:\work\resotools\tmp\test-ResoadbObj\liechexingshi.png"
-    # shape_l = [1585, 1036, 1645, 1058]
-    # crop_image(shape_l,imp_path)
+    imp_path = r"D:\work\resotools\tmp\ResoadbObjtabshoot.png"
+    shape_l = [311, 32, 389, 98]
+    crop_image(shape_l,imp_path)
     
     # 计算轮廓
-    maxloc = (1588, 978)
-    pngshape=(49, 52, 3)
-    shss = maxlocToShape(maxloc, pngshape)
-    print(shss)
+    # maxloc = (1588, 978)
+    # pngshape=(49, 52, 3)
+    # shss = maxlocToShape(maxloc, pngshape)
+    # print(shss)
     

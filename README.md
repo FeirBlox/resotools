@@ -2,7 +2,7 @@
  * @Author: Achetair
  * @Date: 2024-03-11 22:12:32
  * @LastEditors: Achetair
- * @LastEditTime: 2024-03-15 01:40:21
+ * @LastEditTime: 2024-03-19 00:00:43
  * @Description: 
 -->
 # resotools
@@ -18,7 +18,13 @@
 
 # 更新计划
 
-* 随缘
+- [x] 自动巡航（虽然官方出了，但是感觉好贵）
+
+- [ ] 自动铁安局
+
+- [ ] 自动跑商
+
+
 
 # 打包
 

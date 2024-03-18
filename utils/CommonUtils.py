@@ -8,7 +8,7 @@ Description:
 # python 3.11
 import os
 import sys
-from .UserLog import obj_log as log
+from resotools.utils.UserLog import obj_log as log
 import threading
 import ctypes
 import inspect
@@ -16,6 +16,7 @@ import time
 import gc
 import datetime
 import shutil
+import re
 
 def async_raise(tid, exctype):
    """raises the exception, performs cleanup if needed"""
@@ -46,6 +47,12 @@ def dropfixFileName(filep, fix="_cropped"):
     # os.rename(filep, new_filename)
     return new_filename    
 
+def getTextNumber(text):
+    numbers = re.findall(r'[-+]?\d*\.\d+|\d+', text)
+    if numbers is None:
+        return 0
+    return int(numbers[-1])
+
 class threadsManager():
     def __init__(self) -> None:
         self.threadsinfo = {}
@@ -75,3 +82,7 @@ def makedirs(dir_path:str):
         os.makedirs(dir_path)
     else:
         log.error("目录:{} 已存在".format(dir_path))
+        
+if __name__ == "__main__":
+    text = r'剩余行程：90km'
+    getTextNumber(text)
