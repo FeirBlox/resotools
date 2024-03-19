@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-08 23:30:48
 LastEditors: Achetair
-LastEditTime: 2024-03-09 00:36:16
+LastEditTime: 2024-03-19 23:27:20
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -24,4 +24,11 @@ class ChromeLocatePngNotFound(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
  
+class ResoDesCityNotFound(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+        
+class ResoNoBankFound(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)    
     

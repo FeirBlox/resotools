@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-08 23:29:25
 LastEditors: Achetair
-LastEditTime: 2024-03-17 21:43:08
+LastEditTime: 2024-03-19 21:21:34
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -102,6 +102,7 @@ class ABSadbObj():
         
     def locateTpicture(self, picname):
         assert self.store_pic_path != ""
+        self.takeTabShoot()
         pic_path = os.path.join(self.store_pic_path, picname)
         objshoot_png = self.adb_obj.screenshoot_path
         # print(objshoot_png + "    " + pic_path)
@@ -125,7 +126,7 @@ class ABSadbObj():
     def clickPictureEvent(self, picname, name="", num=3):
         pPoints = None
         for i in range(num):
-            self.takeTabShoot()
+            # self.takeTabShoot()
             pPoints = self.locateTpicture(picname)
             if pPoints is not None:
                 if name == "":

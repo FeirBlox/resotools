@@ -7,6 +7,7 @@ QQ交流群:905019785
 import random
 from tkinter import *
 from tkinter.ttk import *
+from tokenize import Single
 
 from utils.UserLog import obj_log as log
 from utils.CommonUtils import *
@@ -42,9 +43,9 @@ class WinGUI(Tk):
         self.tk_label_ltx3p6yw = self.__tk_label_ltx3p6yw(self)
         self.tk_button_autorunbusiness = self.__tk_button_autorunbusiness(self)
         self.tk_label_ltx3qkfa = self.__tk_label_ltx3qkfa(self)
-        self.tk_input_ltx3qygc = self.__tk_input_ltx3qygc(self)
+        self.tk_input_startcity = self.__tk_input_startcity(self)
         self.tk_label_ltx3rfde = self.__tk_label_ltx3rfde(self)
-        self.tk_input_ltx3s9jb = self.__tk_input_ltx3s9jb(self)
+        self.tk_input_endcity = self.__tk_input_endcity(self)
     def __win(self):
         self.title("Reso Tools")
         # 设置窗口大小、居中
@@ -146,7 +147,7 @@ class WinGUI(Tk):
         label = Label(parent,text="始发地：",anchor="center", )
         label.place(x=360, y=104, width=50, height=30)
         return label
-    def __tk_input_ltx3qygc(self,parent):
+    def __tk_input_startcity(self,parent):
         ipt = Entry(parent, )
         ipt.place(x=420, y=104, width=117, height=30)
         return ipt
@@ -154,7 +155,7 @@ class WinGUI(Tk):
         label = Label(parent,text="目的地：",anchor="center", )
         label.place(x=360, y=140, width=50, height=30)
         return label
-    def __tk_input_ltx3s9jb(self,parent):
+    def __tk_input_endcity(self,parent):
         ipt = Entry(parent, )
         ipt.place(x=420, y=140, width=117, height=30)
         return ipt
@@ -164,7 +165,7 @@ class WinMan():
         self.threadObjs = threadsManager()
         
         self.leftclick_fgtHundunXB_num = 0
-        
+        self.leftclick_tieanju_num = 0
         # self.__event_bind()
         # self.__style_config()
         # self.ctl.init(self)
@@ -205,12 +206,53 @@ class WinMan():
             else:
                 self.threadObjs.killTthread("hundunxb")
             self.leftclick_fgtHundunXB_num += 1
+            
+    def btnAutoIronSecurity(self, evt):
+        if evt.num == 1:
+            if self.leftclick_tieanju_num % 2 == 0:
+                self.threadObjs.startNewThread(self.resoobj.autoIronSecurity, "autoIronSecurity")
+            else:
+                self.threadObjs.killTthread("autoIronSecurity")
+            self.leftclick_tieanju_num += 1
+            
+    def btnAutoRunBusiness(self,evt):
+        startcity = self.winui.tk_input_startcity.get()
+        endcity = self.winui.tk_input_endcity.get()
+        
+        assert startcity != "" and startcity is not None
+        assert endcity != "" and endcity is not None
+        if evt.num == 1:
+            if self.leftclick_tieanju_num % 2 == 0:
+                self.threadObjs.startNewThread(self.resoobj.autoRunningBusiness, "autoRunBusiness", startcity, endcity)
+            else:
+                self.threadObjs.killTthread("autoRunBusiness")
+            self.leftclick_tieanju_num += 1        
     
+    def citySingleInput(self):
+        citydata = self.resoobj.city_list
+        data_dict = {
+        self.winui.tk_input_startcity: citydata,
+        self.winui.tk_input_endcity: citydata,        
+        }
+        
+        for i, (key, value) in enumerate(data_dict.items()):
+            # key.grid(row=0, column=1)
+            entry = key
+            combobox = Combobox(self.winui, values=value, state="readonly")
+            # combobox.grid(row=0, column=1, padx=5) 
+            combobox.place(x=key.winfo_x(), y=key.winfo_y())
+            combobox.bind("<<ComboboxSelected>>", lambda event, combobox=combobox, entry=entry: on_select(event, combobox, entry))   
+
+             
+                
     def __event_bind(self):
         self.winui.tk_button_btnAutoStart.bind('<Button-1>', self.btnAutoStart)
         self.winui.tk_button_btnAutoStop.bind('<Button-1>', self.btnAutoStop)
         self.winui.tk_button_fgtHundunXB.bind('<Button-1>', self.fgtHundunXB)
+        self.winui.tk_button_tieanju.bind('<Button-1>', self.btnAutoIronSecurity)
+        self.winui.tk_button_autorunbusiness.bind('<Button-1>', self.btnAutoRunBusiness)
         
+        # self.citySingleInput()
         self.winui.tk_button_btnAutoStop.config(state=DISABLED)
         
         # 将日志和文本框绑定
@@ -220,7 +262,12 @@ class WinMan():
     def start(self):
         self.__event_bind()
         self.winui.mainloop()
-        
+
+
+def on_select(event, combobox:Combobox, entry:Entry):
+    selected_item = combobox.get()
+    entry.delete(0, END)
+    entry.insert(END, selected_item)
     
 if __name__ == "__main__":
     # 启动脚本相关的数据

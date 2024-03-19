@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-08 22:12:54
 LastEditors: Achetair
-LastEditTime: 2024-03-17 19:50:51
+LastEditTime: 2024-03-19 22:23:29
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -68,10 +68,12 @@ class ADB():
     def clickPosition(self, point=(0,0)):
         # 点击坐标
         shell_cmd = [self.adb_path, "-s", self.ip_addr, "shell", "input", "tap", str(point[0]), str(point[1])]
+        # print(" ".join(shell_cmd))
         run(shell_cmd, shell=True) 
         
     def swipePosition(self, srcpoint=(0,0), dstpoint=(0,0), time:int=100):
         shell_cmd = [self.adb_path, "-s", self.ip_addr, "shell", "input", "swipe", str(srcpoint[0]), str(srcpoint[1]), str(dstpoint[0]), str(dstpoint[1]), str(int(time))]
+        # print(" ".join(shell_cmd))
         run(shell_cmd, shell=True) 
         
         

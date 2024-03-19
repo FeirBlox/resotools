@@ -29,6 +29,7 @@ class Ocr_tools():
     '''
     def ocr_characters(self, img_path, charac):
         ocr_list = self.ocr_img(img_path)
+        # print(ocr_list)
         for vd in ocr_list:
             msg = vd["text"]
             if charac in msg:
@@ -37,6 +38,22 @@ class Ocr_tools():
                 return (msg, self.ocr_center_pos(pos))
                 # return (msg, self.__extract_shape(vd["position"]))
         return None
+    
+    def ocr_characters_strict(self, img_path, charac):
+        ocr_list = self.ocr_img(img_path)
+        ret_list = []
+        # print(ocr_list)
+        for vd in ocr_list:
+            msg = vd["text"]
+            if charac in msg:
+                pos = vd["position"]
+                log.debug("发现文字 : {}, 轮廓为：{}".format(charac, self.__extract_shape(pos)))
+                ret_list.append((msg, self.ocr_center_pos(pos)))
+                # return (msg, self.__extract_shape(vd["position"]))
+        if len(ret_list)==0:
+            return None
+        else:
+            return ret_list
         
     def __extract_shape(self, npa):
         npl = npa.tolist()

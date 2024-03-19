@@ -49,9 +49,45 @@ def dropfixFileName(filep, fix="_cropped"):
 
 def getTextNumber(text):
     numbers = re.findall(r'[-+]?\d*\.\d+|\d+', text)
-    if numbers is None:
-        return 0
-    return int(numbers[-1])
+    try:
+        ret_num = int(numbers[-1])
+        return ret_num
+    except Exception as e:
+        log.error("触发匹配失败：{}".format(text))
+        return 500
+    
+class Point:
+    def __init__(self, x=0, y=0):
+        self.x = x
+        self.y = y
+        
+    def distance_from_origin(self):
+        return ((self.x ** 2) + (self.y ** 2)) ** 0.5
+    
+    def distance(self, other):
+        return ((self.x - other.x) ** 2 + (self.y - other.y) ** 2) ** 0.5
+    
+    def __add__(self, other):
+        return Point(self.x + other.x, self.y + other.y)
+    
+    def __sub__(self, other):
+        return Point(self.x - other.x, self.y - other.y)
+    
+    def clamp_x(self, min_value=0, max_value=1920):
+        self.x= max(min(self.x, max_value), min_value)
+        
+    def __str__(self) -> str:
+        return "({},{})".format(self.x, self.y)
+    
+    def clamp_y(self, min_value=0, max_value=1080):
+        self.y = max(min(self.y , max_value), min_value) 
+    
+    def clamp(self):
+        self.clamp_x()
+        self.clamp_y()
+      
+    def tuple(self):
+        return (self.x, self.y)
 
 class threadsManager():
     def __init__(self) -> None:
