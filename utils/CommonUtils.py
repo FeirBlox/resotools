@@ -33,7 +33,11 @@ def async_raise(tid, exctype):
       raise SystemError("PyThreadState_SetAsyncExc failed")
       
 def stop_thread(thread):
-   async_raise(thread.ident, SystemExit)
+    try:
+        async_raise(thread.ident, SystemExit)
+    except ValueError:
+        # log.debug()
+        return 
    
 def copy_and_rename_file(original_filename, new_filename):
     shutil.copyfile(original_filename, new_filename)

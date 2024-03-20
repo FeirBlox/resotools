@@ -287,12 +287,7 @@ class ResoadbObj(ABSadbObj):
         
     
     def _sell(self):
-        # 先卖货
-        # state = self._ocr_tabshoot("我要卖")
-        # if state is not None:
-        #     self.adb_obj.clickPosition(state[1])
-        # else:
-        #     raise Exception
+
         state = self.clickPictureEvent("sell.png", "我要卖")
         time.sleep(2)
         
@@ -304,6 +299,7 @@ class ResoadbObj(ABSadbObj):
         if state is None:
             raise ResoNoBankFound
         if (state <= 20):
+            log.info("当前货量：{}， 货物已经卖出，开始买！".format(state))
             return  
         log.info("目前载货量：{}/530， 开始卖货".format(state))
         
@@ -313,23 +309,12 @@ class ResoadbObj(ABSadbObj):
         self.adb_obj.clickPosition(state[1])
         time.sleep(1)
         state = self._ocr_tabshoot("卖出", True)[-1]
-        # print(state)
-        # if state[0] != "卖出":
-        #     raise Exception
+
+
         self.adb_obj.clickPosition(state[1])
         time.sleep(3)
         self._clickBlank()
-        # # 检查载货量
-        # xm_name = "载货量"
-        # self.takeTabShoot()
-        # part_pic = self.cutPartPic(self.pos_data[xm_name])
-        # state = self.ocr.ocr_number(part_pic)
-        # if state is None:
-        #     raise Exception
-        
-        # if (state <= 30):
-        #     log.info("卖货成功！")
-        #     return 
+
         
     def _clickBlank(self):
         center = (983, 1014)
@@ -340,7 +325,30 @@ class ResoadbObj(ABSadbObj):
         # if state is None:
         #     raise Exception
         log.info("我要买！买！买！买！")
-        state = self.clickPictureEvent("buy.png", "我要买")
+        repeat_num = 0
+        while(True):
+            state = self.locateTpicture("buy.png")
+            if state is None:
+                # 重新进入交易所
+                if repeat_num == 0:
+                    state = self.clickPictureEvent("fanhui.png","返回")
+                if repeat_num >= 1:
+                    log.info("未发现买入图片，重新进入城市进行查找")
+                    # 重新进入城市
+                    time.sleep(1)
+                    self.backToCityHome()
+                    time.sleep(1)
+                    # 重新进入交易所
+                    self.stepToBusiness()
+                    time.sleep(1)
+                    self.takeTabShoot()
+                if repeat_num >= 3:
+                    raise Exception
+                repeat_num += 1
+            else:
+                self.adb_obj.clickPosition(state)
+                break
+                    
         time.sleep(2)       
         
         # 检查载货量
@@ -353,35 +361,57 @@ class ResoadbObj(ABSadbObj):
         if (state >= 200):
             log.info("卖货不成功！")
             raise Exception
-         
+        repeat_num = 1
+
         state = self._ocr_tabshoot("全部")
         if state is None:
             raise Exception
         self.adb_obj.clickPosition(state[1])
         time.sleep(1)        
         state = self._ocr_tabshoot("买入", True)[-1]
-        self.adb_obj.clickPosition(state[1])   
+        self.adb_obj.clickPosition(state[1]) 
+
         time.sleep(3)
         self._clickBlank()
-         
-            
         
-    def buyandsell(self):
+    
+    def stepToBusiness(self):
         log.info("交易所，I'm coming ~~~~~~~")
         time.sleep(2)
-        self.takeTabShoot()
-        state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "交易所")
-        if state is not None:
-            pos = state[1]
-            x = pos[0] - 5
-            y = pos[1] + 120
-            self.adb_obj.clickPosition((x,y))
+        repeat_num = 0
+        while(True):
+            self.takeTabShoot()
+            state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "交易所")
+            if state is not None:
+                pos = state[1]
+                x = pos[0] - 5
+                y = pos[1] + 120
+                self.adb_obj.clickPosition((x,y))
+                break
+            else:
+                # 刷新重新进入
+                self.backToCityHome()
+                repeat_num += 1
+            if repeat_num >= 1:
+                time.sleep(1)
+                for i in range(repeat_num):
+                    # 进行拖拽的操作
+                    bPos = (1199,434)
+                    ePos = (903,436)
+                    self.adb_obj.swipePosition(bPos,ePos)
+            if repeat_num >= 4:
+                log.error("没有发现交易所")
+                raise ResoNoBankFound        
+        
+    def buyandsell(self):
+        self.stepToBusiness()
         time.sleep(1)
         self._sell()
         time.sleep(1)
         self._buy()
         
     def _ocr_tabshoot(self, characs, isStrict=False):
+        time.sleep(1)
         self.takeTabShoot()
         if isStrict:
             return self.ocr.ocr_characters_strict(self.adb_obj.screenshoot_path, characs)
@@ -436,20 +466,23 @@ class ResoadbObj(ABSadbObj):
     
     # 返回城市的首页
     def backToCityHome(self):
-        self.takeTabShoot()
         log.info("城市：{} 首页".format(self.tmpcityDes))
-        state = self.clickPictureEvent("cityhomepage.png", name="城市首页")
-        if state is None:
-            raise Exception
+        state = self.locateTpicture("cityhomepage.png")
+        if state is not None:
+            self.adb_obj.clickPosition(state)
         time.sleep(1)
         state = self.clickPictureEvent("fangwenchengshi.png")
         return 
     
     def autoIronSecurity(self):
         log.info("自动化清理铁安局日常")
-        self.takeTabShoot()
+        self.backToCityHome()
+
         # 点击铁安局，自动战斗
-        state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "铁安局")
+        self._ocr_tabshoot("铁安局")
+        # time.sleep(1)
+        # self.takeTabShoot()
+        # state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "铁安局")
         if state is not None:
             pos = state[1]
             x = pos[0] - 5
@@ -485,9 +518,8 @@ class ResoadbObj(ABSadbObj):
         destination = ""
          
         while(True):
-            self.takeTabShoot()
             time.sleep(1)
-            
+            self.takeTabShoot()
             # 获取剩余里程，目的地
             state = self.ocr.ocr_mutitext(self.adb_obj.screenshoot_path, ["剩余行程", "目的地"])
 
