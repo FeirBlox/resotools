@@ -130,6 +130,7 @@ class ResoCityGraph():
         return list(self.cityPosInfo.keys())
     
     def getCityDistance(self, srccity:str, dstcity:str, per=1):
+        log.info("城市1 {} , 城市2： {}".format(srccity, dstcity))
         assert srccity in self.cityPosInfo.keys()
         assert dstcity in self.cityPosInfo.keys()
         src_pos = self.cityPosInfo[srccity]
@@ -255,7 +256,7 @@ class ResoadbObj(ABSadbObj):
             # log.error("未知错误")
             raise Exception
         # 进入地图开始查找相关的数据
-        dis = self.resograph.getCityDistance(self.tmpcityDes, tocity, 0.9)
+        dis = self.resograph.getCityDistance(self.tmpcityDes, tocity, 1)
         endPoint = centPoint + Point(*dis)
         # endPoint.clamp()
         log.info("开始位置:{}, 结束位置：{}".format(centPoint, endPoint))
@@ -479,7 +480,7 @@ class ResoadbObj(ABSadbObj):
         self.backToCityHome()
 
         # 点击铁安局，自动战斗
-        self._ocr_tabshoot("铁安局")
+        state = self._ocr_tabshoot("铁安局")
         # time.sleep(1)
         # self.takeTabShoot()
         # state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "铁安局")

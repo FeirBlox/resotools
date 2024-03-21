@@ -3,7 +3,7 @@ cnstd==1.2.3.5
 loguru==0.7.2
 numpy==1.26.4
 onnx==1.15.0
-onnxruntime-gpu==1.17.1
+onnxruntime==1.17.1
 opencv-python==4.9.0.80
 PyAutoGUI==0.9.54
 PyGetWindow==0.0.9
