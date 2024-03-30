@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-03 17:25:58
 LastEditors: Achetair
-LastEditTime: 2024-03-17 22:25:48
+LastEditTime: 2024-03-30 17:59:18
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -108,7 +108,7 @@ def detect_color(image_path):
     
     # 计算灰度图像的平均亮度值
     mean_brightness = cv.mean(gray_image)[0]
-    print(mean_brightness)
+    # print(mean_brightness)
     # 判断图像是白色还是灰色
     if mean_brightness > 100:  # 这里的阈值200可以根据实际情况调整
         return "white"
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     
     # 裁剪图片
     imp_path = r"D:\work\resotools\tmp\ResoadbObjtabshoot.png"
-    shape_l = [311, 32, 389, 98]
+    shape_l = [1758.0, 581.0, 1810.0, 608.0]
     crop_image(shape_l,imp_path)
     
     # 计算轮廓

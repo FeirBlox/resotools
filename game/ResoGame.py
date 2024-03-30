@@ -7,6 +7,7 @@ Description:
 #-*- config:utf-8 -*-
 # python 3.11
 
+from enum import auto
 from re import L
 import stat
 import time
@@ -20,86 +21,6 @@ from resotools.utils.cvTools import *
 from resotools.utils.ocrtools import Ocr_tools
 from scipy.fft import dst
 
-
-class ResoObj(ABSobj):
-    def __init__(self, title="MuMu模拟器12") -> None:
-        super().__init__(title)
-        self.moudle_name = "ResoObj"
-        self.store_pic_path = "pngdata/leisuonasi"
-    
-    # 点击下一步    
-    def clickPictureEvent(self, picname, name=""):
-        count = 0
-        pPoints = None
-        while(1):
-            self.takeTabShoot()
-            pPoints = self.locateTpicture(picname)
-            if pPoints is None:
-                count += 1
-                time.sleep(3)
-                continue
-            break
-        assert pPoints is not None
-        if name == "":
-            log.info("检测到【{}】 在 {}, 执行点击".format(picname, pPoints))
-        else:
-            log.info("检测到【{}】 在 {}, 执行点击".format(name, pPoints))
-        pyautogui.leftClick(pPoints[0], pPoints[1])
-        
-    def dragWindow(self, picname, name=""):
-        count = 0
-        pPoints = None
-        while(1):
-            self.takeTabShoot()
-            pPoints = self.locateTpicture(picname)
-            if pPoints is None:
-                count += 1
-                time.sleep(3)
-                continue
-            break
-        assert pPoints is not None
-        if name == "":
-            log.info("检测到【{}】 在 {}, 执行鼠标移动".format(picname, pPoints))
-        else:
-            log.info("检测到【{}】 在 {}, 执行鼠标移动".format(name, pPoints))
-            
-        pyautogui.moveTo(pPoints[0], pPoints[1]-20)
-        # 执行鼠标拖拽向右
-        # pyautogui.mouseDown(button="left")
-        # pyautogui.moveTo(pPoints[0]+100, pPoints[1], duration=2)
-        # pyautogui.mouseUp(button="left")
-        pyautogui.dragTo(pPoints[0]+200, pPoints[1]-20, duration=1, button="left")
-        
-                
-    def reapteTaojin(self):
-        repeat_count = 0
-        # 检测游戏是否结束
-        while(True):
-            self.takeTabShoot()
-            endp = self.locateTpicture("xiayibu.png")
-            if endp is None:
-                log.info("游戏还没有结束请等待......")
-                time.sleep(10)
-                repeat_count += 1
-                if repeat_count % 4 == 0:
-                    pyautogui.leftClick(self.center_pos[0], self.center_pos[1])
-                continue
-            repeat_count = 0
-            break
-        
-        self.clickPictureEvent("xiayibu.png", name="下一步")
-        while(True):
-            self.dragWindow("anquanweituo4.png")
-            mission_3_point = self.locateTpicture("3.png")
-            if mission_3_point is None:
-                continue
-            break
-        self.clickPictureEvent("3.png", "任务3")
-        time.sleep(1)
-        self.clickPictureEvent("zuozhan.png", "作战")
-        time.sleep(3)
-        self.clickPictureEvent("kaishizuozhan.png", "开始作战")
-        return 1
     
     
 class ResoCityGraph():
@@ -165,6 +86,7 @@ class ResoadbObj(ABSadbObj):
         self.__gameFlagRefresh()
         
         self.text_funcaction_dict = {
+            "触碰":"click",
             "进入游戏":"click",
             "自动巡航":self.autoCruise,
             "下一步":"click",
@@ -195,6 +117,7 @@ class ResoadbObj(ABSadbObj):
     def dispatchImgCenter(self):
         gameStates = self.img_funcact_dict.keys()
         for gs in gameStates:
+            self.takeTabShoot()
             dPos = self.locateTpicture(gs)
             if dPos is None:
                 continue
@@ -213,6 +136,7 @@ class ResoadbObj(ABSadbObj):
         while(True):
             self.takeTabShoot()
             ocrinfos = self.ocr.ocr_img(self.adb_obj.screenshoot_path)
+            # print(ocrinfos)
             findinfos = self.findKeyWord(ocrinfos)
             if findinfos is None:
                 self.dispatchImgCenter()
@@ -240,8 +164,9 @@ class ResoadbObj(ABSadbObj):
     def searchTargetCity(self, tocity):
         centPoint = Point(860, 540)
         # 点击地图
+        self.takeTabShoot()
         self.clickPictureEvent("cityhomepage.png", "启程页面")
-        time.sleep(1)
+        # time.sleep(1)
         self.takeTabShoot()
         state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "启程")
         # print(state)
@@ -250,7 +175,8 @@ class ResoadbObj(ABSadbObj):
         else:
             raise Exception
         log.info("启程：开始选择搜索本次旅途目的地：{}".format(tocity))
-        time.sleep(1)
+        
+        self.takeTabShoot()
         state = self.locateTpicture("pilaotubiao.png")
         if state is None:
             # log.error("未知错误")
@@ -264,8 +190,8 @@ class ResoadbObj(ABSadbObj):
         while(True):
             # 滑动屏幕寻找目的地
             self.adb_obj.swipePosition(centPoint.tuple(), endPoint.tuple())
+            
             self.takeTabShoot()
-            time.sleep(1)
             state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, tocity)       
             if state is not None:
                 self.adb_obj.clickPosition(state[1])
@@ -288,7 +214,7 @@ class ResoadbObj(ABSadbObj):
         
     
     def _sell(self):
-
+        self.takeTabShoot()
         state = self.clickPictureEvent("sell.png", "我要卖")
         time.sleep(2)
         
@@ -328,6 +254,7 @@ class ResoadbObj(ABSadbObj):
         log.info("我要买！买！买！买！")
         repeat_num = 0
         while(True):
+            self.takeTabShoot()
             state = self.locateTpicture("buy.png")
             if state is None:
                 # 重新进入交易所
@@ -341,8 +268,7 @@ class ResoadbObj(ABSadbObj):
                     time.sleep(1)
                     # 重新进入交易所
                     self.stepToBusiness()
-                    time.sleep(1)
-                    self.takeTabShoot()
+
                 if repeat_num >= 3:
                     raise Exception
                 repeat_num += 1
@@ -358,7 +284,7 @@ class ResoadbObj(ABSadbObj):
         part_pic = self.cutPartPic(self.pos_data[xm_name])
         state = self.ocr.ocr_number(part_pic)
         if state is None:
-            raise Exception
+            state = 0
         if (state >= 200):
             log.info("卖货不成功！")
             raise Exception
@@ -412,7 +338,7 @@ class ResoadbObj(ABSadbObj):
         self._buy()
         
     def _ocr_tabshoot(self, characs, isStrict=False):
-        time.sleep(1)
+
         self.takeTabShoot()
         if isStrict:
             return self.ocr.ocr_characters_strict(self.adb_obj.screenshoot_path, characs)
@@ -468,10 +394,13 @@ class ResoadbObj(ABSadbObj):
     # 返回城市的首页
     def backToCityHome(self):
         log.info("城市：{} 首页".format(self.tmpcityDes))
+        self.takeTabShoot()
         state = self.locateTpicture("cityhomepage.png")
         if state is not None:
             self.adb_obj.clickPosition(state)
         time.sleep(1)
+        
+        self.takeTabShoot()
         state = self.clickPictureEvent("fangwenchengshi.png")
         return 
     
@@ -480,6 +409,7 @@ class ResoadbObj(ABSadbObj):
         self.backToCityHome()
 
         # 点击铁安局，自动战斗
+        self.takeTabShoot()
         state = self._ocr_tabshoot("铁安局")
         # time.sleep(1)
         # self.takeTabShoot()
@@ -491,6 +421,7 @@ class ResoadbObj(ABSadbObj):
             self.adb_obj.clickPosition((x,y))
         time.sleep(1)
         # 点击悬赏任务
+        self.takeTabShoot()
         self.clickPictureEvent("xuanshangrenwu.png", name="悬赏任务")
         count = 0
         while(True):
@@ -622,8 +553,10 @@ class ResoadbObj(ABSadbObj):
         state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "到站")
         if state is None:
             return 
+        self.takeTabShoot()
         state = self.clickPictureEvent("jinruzhandian.png", name="进入站点")
         time.sleep(3)
+        self.takeTabShoot()
         state = self.clickPictureEvent("fangwenchengshi.png", name="访问城市")
         # assert self.tmpcityDes != ""
         log.info("进入城市：【{}】".format(self.tmpcityDes))
@@ -635,12 +568,13 @@ class ResoadbObj(ABSadbObj):
         log.info("开始作战！！！")
         repeat_count = 0
         while(True):
-            time.sleep(1)
+
             self.takeTabShoot()
             if not ffight:
                 state = self.clickPictureEvent("kaishizuozhan.png", "开始作战", num=2)
                 ffight = True
                 time.sleep(8)
+                continue
                 
             state = self.locateTpicture("fighting.png")
             if state is not None:
@@ -651,8 +585,8 @@ class ResoadbObj(ABSadbObj):
                     # 检测灰度
                     color = detect_color(cutfile)
                     if color == "grey":
+                        log.info("自动战斗开启")
                         self.adb_obj.clickPosition(calcenterpos(self.pos_data["自动战斗"]))
-                    log.info("自动战斗已经开启")
                     self.gameFlag["自动战斗"] = True                
                 log.info("游戏还没有结束请等待......")
                 ffight = True
@@ -673,7 +607,6 @@ class ResoadbObj(ABSadbObj):
         log.info("作战结束")
                     
 
-    
     def findKeyWord(self, ocr_result):
         textinfos = self.text_funcaction_dict.keys()
         # 遍历ocr的结果

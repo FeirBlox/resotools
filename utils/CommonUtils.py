@@ -7,16 +7,57 @@ Description:
 #-*- config:utf-8 -*-
 # python 3.11
 import os
+import stat
 import sys
 from resotools.utils.UserLog import obj_log as log
 import threading
 import ctypes
 import inspect
 import time
-import gc
+import json
 import datetime
 import shutil
 import re
+
+def getNowTime():
+    return time.time()
+
+def getNowTimeFormat():
+    # 获取当前时间
+    current_time = datetime.datetime.now()
+
+    # 将时间格式化为年月日时分秒格式
+    formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")    
+    return formatted_time
+    
+
+def load_json(file_path):
+    """
+    加载JSON文件
+
+    Parameters:
+        file_path (str): JSON文件的路径
+
+    Returns:
+        dict: 包含文件内容的字典对象
+    """
+    with open(file_path, "r", encoding="utf-8") as json_file:
+        data = json.load(json_file)
+    return data
+
+def save_as_json(data, file_path):
+    """
+    将数据保存为JSON文件
+
+    Parameters:
+        data (dict): 要保存的数据，必须是一个字典类型
+        file_path (str): JSON文件的路径
+
+    Returns:
+        None
+    """
+    with open(file_path, "w") as json_file:
+        json.dump(data, json_file)
 
 def async_raise(tid, exctype):
    """raises the exception, performs cleanup if needed"""
@@ -96,8 +137,15 @@ class Point:
 class threadsManager():
     def __init__(self) -> None:
         self.threadsinfo = {}
+        self.white_list = []
+        
+    def __checkOtherThread(self):
+        for k,v in self.threadsinfo.items():
+            if k not in self.white_list:
+                self.killTthread(k)
     
     def startNewThread(self, func, recordName, *args):
+        self.__checkOtherThread()
         newThread = threading.Thread(
             target=func, args=args
         )
@@ -105,16 +153,26 @@ class threadsManager():
         newThread.daemon = True
         newThread.start()
         
-        
+    def setWhiteList(self, name):
+        if name not in self.white_list:
+            self.white_list.append(name)
+                    
     def killThreads(self):
         for k,v in self.threadsinfo.items():
             stop_thread(v)
             log.info("终止进程 {} ".format(k))
             
     def killTthread(self, rname):
-        stop_thread(self.threadsinfo[rname])
-        log.info("终止进程 {} ".format(rname))
-
+        stateth = self.threadsinfo.get(rname)
+        if stateth is None:
+            # 在其他进程已经被杀死
+            return False        
+        if stateth.is_alive():
+            stop_thread(self.threadsinfo[rname])
+            log.info("终止进程 {} ".format(rname))
+            return True
+        else:
+            return False
 
 def makedirs(dir_path:str):
     if not os.path.exists(dir_path):

@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-08 22:12:54
 LastEditors: Achetair
-LastEditTime: 2024-03-20 21:41:37
+LastEditTime: 2024-03-30 17:48:00
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -20,7 +20,7 @@ class ADB():
         
         # 创建连接
         msg = self.__connect()
-        print(msg)
+        # print(msg)
         
     '''
     description: 
@@ -52,6 +52,12 @@ class ADB():
         # print(shell_cmd)
         result = run(shell_cmd, shell=True, capture_output=True)
         return result.stdout
+    
+    def reconnect(self):
+        shell_cmd = [self.adb_path, "connect", self.ip_addr]
+        # print(shell_cmd)
+        result = run(shell_cmd, shell=True, capture_output=True)
+        return result.stdout        
     
     def disconnect(self):
         shell = [self.adb_path, "kill-server"]

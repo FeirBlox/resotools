@@ -29,23 +29,24 @@ class WinGUI(Tk):
     def __init__(self):
         super().__init__()
         self.__win()
-        self.tk_label_ltpr0f75 = self.__tk_label_ltpr0f75(self)
         self.tk_text_textLog = self.__tk_text_textLog(self)
-        self.tk_label_ltpr1pz9 = self.__tk_label_ltpr1pz9(self)
         self.tk_button_btnAutoStart = self.__tk_button_btnAutoStart(self)
-        self.tk_label_ltpr4mos = self.__tk_label_ltpr4mos(self)
-        self.tk_label_ltpr54it = self.__tk_label_ltpr54it(self)
-        self.tk_button_btnAutoStop = self.__tk_button_btnAutoStop(self)
+        # self.tk_button_btnAutoStop = self.__tk_button_btnAutoStop(self)
         self.tk_button_fgtHundunXB = self.__tk_button_fgtHundunXB(self)
-        self.tk_input_fgthdxbNum = self.__tk_input_fgthdxbNum(self)
-        self.tk_label_ltpr9q0z = self.__tk_label_ltpr9q0z(self)
         self.tk_button_tieanju = self.__tk_button_tieanju(self)
-        self.tk_label_ltx3p6yw = self.__tk_label_ltx3p6yw(self)
         self.tk_button_autorunbusiness = self.__tk_button_autorunbusiness(self)
         self.tk_label_ltx3qkfa = self.__tk_label_ltx3qkfa(self)
-        self.tk_input_startcity = self.__tk_input_startcity(self)
         self.tk_label_ltx3rfde = self.__tk_label_ltx3rfde(self)
-        self.tk_input_endcity = self.__tk_input_endcity(self)
+        self.tk_select_box_startcity = self.__tk_select_box_startcity(self)
+        self.tk_select_box_endcity = self.__tk_select_box_endcity(self)
+        self.tk_button_activity = self.__tk_button_activity(self)
+        self.tk_select_box_activity = self.__tk_select_box_activity(self)
+        self.tk_check_button_autotili = self.__tk_check_button_autotili(self)
+        self.tk_check_button_autopilao = self.__tk_check_button_autopilao(self)
+        self.tk_label_pushupprice = self.__tk_label_pushupprice(self)
+        self.tk_select_box_lucjoop6 = self.__tk_select_box_lucjoop6(self)
+        self.tk_label_haggle = self.__tk_label_haggle(self)
+        self.tk_select_box_lucjq694 = self.__tk_select_box_lucjq694(self)
     def __win(self):
         self.title("Reso Tools")
         # 设置窗口大小、居中
@@ -91,74 +92,84 @@ class WinGUI(Tk):
             hbar = Scrollbar(master, orient="horizontal")
             self.h_scrollbar(hbar, widget, x, y, w, h, pw, ph)
         self.scrollbar_autohide(vbar, hbar, widget)
-    def __tk_label_ltpr0f75(self,parent):
-        label = Label(parent,text="Reso Tools",anchor="center", )
-        label.place(x=0, y=0, width=72, height=30)
-        return label
     def __tk_text_textLog(self,parent):
         text = Text(parent)
         text.place(x=0, y=211, width=800, height=289)
         return text
-    def __tk_label_ltpr1pz9(self,parent):
-        label = Label(parent,text="日志记录",anchor="center", )
-        label.place(x=0, y=178, width=63, height=30)
-        return label
     def __tk_button_btnAutoStart(self,parent):
-        btn = Button(parent, text="开启自动巡航", takefocus=False,)
-        btn.place(x=0, y=27, width=156, height=30)
+        btn = Button(parent, text="自动巡航", takefocus=False,)
+        btn.place(x=0, y=0, width=156, height=30)
         return btn
-    def __tk_label_ltpr4mos(self,parent):
-        label = Label(parent,text="--------------------------------------------",anchor="center", )
-        label.place(x=0, y=104, width=212, height=30)
-        return label
-    def __tk_label_ltpr54it(self,parent):
-        label = Label(parent,text="--------------------------------------------",anchor="center", )
-        label.place(x=0, y=0, width=212, height=30)
-        return label
-    def __tk_button_btnAutoStop(self,parent):
-        btn = Button(parent, text="关闭自动巡航", takefocus=False,)
-        btn.place(x=0, y=67, width=155, height=30)
-        return btn
+    # def __tk_button_btnAutoStop(self,parent):
+    #     btn = Button(parent, text="关闭自动巡航", takefocus=False,)
+    #     btn.place(x=0, y=49, width=155, height=30)
+    #     return btn
     def __tk_button_fgtHundunXB(self,parent):
         btn = Button(parent, text="混沌信标挑战", takefocus=False,)
-        btn.place(x=275, y=0, width=80, height=30)
+        btn.place(x=290, y=0, width=80, height=30)
         return btn
-    def __tk_input_fgthdxbNum(self,parent):
-        ipt = Entry(parent, )
-        ipt.place(x=371, y=0, width=95, height=30)
-        return ipt
-    def __tk_label_ltpr9q0z(self,parent):
-        label = Label(parent,text="次数",anchor="center", )
-        label.place(x=476, y=0, width=50, height=30)
-        return label
     def __tk_button_tieanju(self,parent):
         btn = Button(parent, text="铁安局", takefocus=False,)
-        btn.place(x=275, y=40, width=80, height=30)
+        btn.place(x=283, y=50, width=80, height=30)
         return btn
-    def __tk_label_ltx3p6yw(self,parent):
-        label = Label(parent,text="--------------------------------------------",anchor="center", )
-        label.place(x=275, y=62, width=212, height=30)
-        return label
     def __tk_button_autorunbusiness(self,parent):
         btn = Button(parent, text="自动跑商", takefocus=False,)
-        btn.place(x=275, y=100, width=80, height=30)
+        btn.place(x=0, y=100, width=80, height=30)
         return btn
     def __tk_label_ltx3qkfa(self,parent):
         label = Label(parent,text="始发地：",anchor="center", )
-        label.place(x=360, y=104, width=50, height=30)
+        label.place(x=0, y=136, width=50, height=30)
         return label
-    def __tk_input_startcity(self,parent):
-        ipt = Entry(parent, )
-        ipt.place(x=420, y=104, width=117, height=30)
-        return ipt
     def __tk_label_ltx3rfde(self,parent):
         label = Label(parent,text="目的地：",anchor="center", )
-        label.place(x=360, y=140, width=50, height=30)
+        label.place(x=0, y=173, width=50, height=30)
         return label
-    def __tk_input_endcity(self,parent):
-        ipt = Entry(parent, )
-        ipt.place(x=420, y=140, width=117, height=30)
-        return ipt
+    def __tk_select_box_startcity(self,parent):
+        cb = Combobox(parent, state="readonly", )
+        # cb['values'] = ("列表框","Python","Tkinter Helper")
+        cb.place(x=54, y=136, width=150, height=30)
+        return cb
+    def __tk_select_box_endcity(self,parent):
+        cb = Combobox(parent, state="readonly", )
+        # cb['values'] = ("列表框","Python","Tkinter Helper")
+        cb.place(x=54, y=173, width=150, height=30)
+        return cb
+    def __tk_button_activity(self,parent):
+        btn = Button(parent, text="活动", takefocus=False,)
+        btn.place(x=402, y=4, width=50, height=30)
+        return btn
+    def __tk_select_box_activity(self,parent):
+        cb = Combobox(parent, state="readonly", )
+        # cb['values'] = ("列表框","Python","Tkinter Helper")
+        cb.place(x=309, y=90, width=150, height=30)
+        return cb
+    def __tk_check_button_autotili(self,parent):
+        cb = Checkbutton(parent,text="自动体力",)
+        cb.place(x=677, y=1, width=119, height=30)
+        return cb
+    def __tk_check_button_autopilao(self,parent):
+        cb = Checkbutton(parent,text="自动疲劳",)
+        cb.place(x=674, y=43, width=121, height=30)
+        return cb
+    def __tk_label_pushupprice(self,parent):
+        label = Label(parent,text="抬价",anchor="center", )
+        label.place(x=93, y=96, width=35, height=30)
+        return label
+    def __tk_select_box_lucjoop6(self,parent):
+        cb = Combobox(parent, state="readonly", )
+        cb['values'] = [str(x) for x in range(1, 11)]
+        cb.place(x=139, y=102, width=41, height=30)
+        return cb
+    def __tk_label_haggle(self,parent):
+        label = Label(parent,text="讲价",anchor="center", )
+        label.place(x=190, y=100, width=35, height=30)
+        return label
+    def __tk_select_box_lucjq694(self,parent):
+        cb = Combobox(parent, state="readonly", )
+        cb['values'] = [str(x) for x in range(1, 11)]
+        cb.place(x=229, y=102, width=37, height=30)
+        return cb
+
     
 class WinMan():
     def __init__(self):        
@@ -166,9 +177,12 @@ class WinMan():
         
         self.leftclick_fgtHundunXB_num = 0
         self.leftclick_tieanju_num = 0
+        self.leftclick_autocruise_num = 0
         # self.__event_bind()
         # self.__style_config()
         # self.ctl.init(self)
+        self.lattest_leftclick_time = 0
+        self.lattest_leftclick_name = ""
     
     def convert_to_number(self, text):
         number = 0
@@ -186,25 +200,49 @@ class WinMan():
         self.winui = gui
         # self.ctl.init(self)
         
+    def global_click_count(self, evt):
+        if evt.num == 1:
+            try:
+                clickclass = evt.widget.winfo_class().lower()
+                if "button" not in clickclass:
+                    return
+            except Exception as e:
+                return             
+            clicktime = getNowTime()
+            clickname = evt.widget.cget("text")  # 获取点击控件的名称
+            if clickname == self.lattest_leftclick_name and (clicktime - self.lattest_leftclick_time) < 60:
+                self.resoobj.adb_obj.reconnect()
+            
+            log.info("亲，在为您在准备【{}】了，请勿频繁点击哟~~~~~".format(clickname))
+            
+            self.lattest_leftclick_time = clicktime
+            self.lattest_leftclick_name = clickname
+        
+        
     def btnAutoStart(self, evt):
         if evt.num == 1:
-            self.threadObjs.startNewThread(self.resoobj.autoDetectExcute, "autoxunhang")
-            self.winui.tk_button_btnAutoStart.config(state=DISABLED)
-            self.winui.tk_button_btnAutoStop.config(state=NORMAL)
+            if self.leftclick_autocruise_num % 2 == 0:
+                self.threadObjs.startNewThread(self.resoobj.autoDetectExcute, "autoxunhang")
+            else:
+                if not self.threadObjs.killTthread("autoxunhang"):
+                    self.threadObjs.startNewThread(self.resoobj.autoDetectExcute, "autoxunhang")
+            self.leftclick_autocruise_num += 1
+            # self.winui.tk_button_btnAutoStart.config(state=DISABLED)
+            # self.winui.tk_button_btnAutoStop.config(state=NORMAL)
         
-    def btnAutoStop(self, evt):
-        self.threadObjs.killTthread("autoxunhang")
-        self.winui.tk_button_btnAutoStart.config(state=NORMAL)
-        self.winui.tk_button_btnAutoStop.config(state=DISABLED)
+    # def btnAutoStop(self, evt):
+    #     self.threadObjs.killTthread("autoxunhang")
+    #     self.winui.tk_button_btnAutoStart.config(state=NORMAL)
+    #     self.winui.tk_button_btnAutoStop.config(state=DISABLED)
     
     def fgtHundunXB(self, evt):
         if evt.num == 1:
             if self.leftclick_fgtHundunXB_num % 2 == 0:
-                text = self.winui.tk_input_fgthdxbNum.get()
-                fnum = self.convert_to_number(text)
-                self.threadObjs.startNewThread(self.resoobj.fightFloatTree, "hundunxb", fnum)
+                self.threadObjs.startNewThread(self.resoobj.fightFloatTree, "hundunxb")
             else:
-                self.threadObjs.killTthread("hundunxb")
+                if not self.threadObjs.killTthread("hundunxb"):
+                    self.threadObjs.startNewThread(self.resoobj.fightFloatTree, "hundunxb")
+                    
             self.leftclick_fgtHundunXB_num += 1
             
     def btnAutoIronSecurity(self, evt):
@@ -212,12 +250,13 @@ class WinMan():
             if self.leftclick_tieanju_num % 2 == 0:
                 self.threadObjs.startNewThread(self.resoobj.autoIronSecurity, "autoIronSecurity")
             else:
-                self.threadObjs.killTthread("autoIronSecurity")
+                if not self.threadObjs.killTthread("autoIronSecurity"):
+                    self.threadObjs.startNewThread(self.resoobj.autoIronSecurity, "autoIronSecurity")
             self.leftclick_tieanju_num += 1
             
     def btnAutoRunBusiness(self,evt):
-        startcity = self.winui.tk_input_startcity.get()
-        endcity = self.winui.tk_input_endcity.get()
+        startcity = self.winui.tk_select_box_startcity.get()
+        endcity = self.winui.tk_select_box_endcity.get()
         
         assert startcity != "" and startcity is not None
         assert endcity != "" and endcity is not None
@@ -228,33 +267,18 @@ class WinMan():
                 self.threadObjs.killTthread("autoRunBusiness")
             self.leftclick_tieanju_num += 1        
     
-    def citySingleInput(self):
-        citydata = self.resoobj.city_list
-        data_dict = {
-        self.winui.tk_input_startcity: citydata,
-        self.winui.tk_input_endcity: citydata,        
-        }
-        
-        for i, (key, value) in enumerate(data_dict.items()):
-            # key.grid(row=0, column=1)
-            entry = key
-            combobox = Combobox(self.winui, values=value, state="readonly")
-            # combobox.grid(row=0, column=1, padx=5) 
-            combobox.place(x=key.winfo_x(), y=key.winfo_y())
-            combobox.bind("<<ComboboxSelected>>", lambda event, combobox=combobox, entry=entry: on_select(event, combobox, entry))   
-
-             
-                
     def __event_bind(self):
+        self.winui.bind_all("<Button-1>", self.global_click_count)
         self.winui.tk_button_btnAutoStart.bind('<Button-1>', self.btnAutoStart)
-        self.winui.tk_button_btnAutoStop.bind('<Button-1>', self.btnAutoStop)
+        # self.winui.tk_button_btnAutoStop.bind('<Button-1>', self.btnAutoStop)
         self.winui.tk_button_fgtHundunXB.bind('<Button-1>', self.fgtHundunXB)
         self.winui.tk_button_tieanju.bind('<Button-1>', self.btnAutoIronSecurity)
         self.winui.tk_button_autorunbusiness.bind('<Button-1>', self.btnAutoRunBusiness)
         
-        # self.citySingleInput()
-        self.winui.tk_button_btnAutoStop.config(state=DISABLED)
+        # self.winui.tk_button_btnAutoStop.config(state=DISABLED)
         
+        self.winui.tk_select_box_startcity["values"] = self.resoobj.city_list
+        self.winui.tk_select_box_endcity["values"] = self.resoobj.city_list
         # 将日志和文本框绑定
         handler = TkinterLogHandler(self.winui.tk_text_textLog)
         log.add(handler, level="INFO")

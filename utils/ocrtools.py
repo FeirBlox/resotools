@@ -16,7 +16,7 @@ class Ocr_tools():
     def __init__(self,det_model_name="ch_PP-OCRv3_det", rec_model_name= "densenet_lite_114-fc", det_root="model/cnstd", rec_root="model/cnocr", number=False, start=True) -> None:
         det_root, rec_root = os.path.join(MODEL_ROOT, det_root), os.path.join(MODEL_ROOT, rec_root)
         
-        print("det_root: {}, rec_root:{}".format(det_root, rec_root))
+        # print("det_root: {}, rec_root:{}".format(det_root, rec_root))
         rec_vocab_path = os.path.join(MODEL_ROOT, "model/cnocr/label_cn.txt")
         self.ocr = CnOcr(det_model_name=det_model_name, rec_model_name=rec_model_name, rec_vocab_fp=rec_vocab_path, det_root=det_root, rec_root=rec_root) 
         self.number_ocr = CnOcr(det_model_name=det_model_name, rec_model_name="en_number_mobile_v2.0", det_root=det_root, rec_root=rec_root, cand_alphabet='0123456789.+%')

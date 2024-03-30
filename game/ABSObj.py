@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-08 23:29:25
 LastEditors: Achetair
-LastEditTime: 2024-03-19 21:21:34
+LastEditTime: 2024-03-29 18:38:19
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -81,6 +81,8 @@ class ABSadbObj():
         self.tmpstore_path = tmpstore_path
         
     def takeTabShoot(self):
+        # 截图前停顿1s,防止出错
+        time.sleep(1)
         self.adb_obj.takeScreenShoot()
         
     # 快照测试用的文件    
@@ -102,7 +104,7 @@ class ABSadbObj():
         
     def locateTpicture(self, picname):
         assert self.store_pic_path != ""
-        self.takeTabShoot()
+        # self.takeTabShoot()
         pic_path = os.path.join(self.store_pic_path, picname)
         objshoot_png = self.adb_obj.screenshoot_path
         # print(objshoot_png + "    " + pic_path)
