@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-08 23:30:48
 LastEditors: Achetair
-LastEditTime: 2024-03-19 23:27:20
+LastEditTime: 2024-04-04 10:35:30
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -30,5 +30,8 @@ class ResoDesCityNotFound(Exception):
         
 class ResoNoBankFound(Exception):
     def __init__(self, *args: object) -> None:
-        super().__init__(*args)    
-    
+        super().__init__(*args)  
+        
+class FightUnexpectException(Exception):  
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)      

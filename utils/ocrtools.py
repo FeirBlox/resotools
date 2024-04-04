@@ -31,12 +31,18 @@ class Ocr_tools():
         ocr_list = self.ocr_img(img_path)
         # print(ocr_list)
         for vd in ocr_list:
-            msg = vd["text"]
+            msg = vd["text"].lower()
             if charac in msg:
                 pos = vd["position"]
                 log.debug("发现文字 : {}, 轮廓为：{}".format(charac, self.__extract_shape(pos)))
                 return (msg, self.ocr_center_pos(pos))
                 # return (msg, self.__extract_shape(vd["position"]))
+        return None
+    
+    def ocr_singleline(self, imgpath):
+        ocr_result = self.ocr.ocr_for_single_line(imgpath)
+        if ocr_result is not None:
+            return ocr_result["text"]
         return None
     
     def ocr_characters_strict(self, img_path, charac):

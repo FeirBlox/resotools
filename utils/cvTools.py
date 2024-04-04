@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-03 17:25:58
 LastEditors: Achetair
-LastEditTime: 2024-03-30 17:59:18
+LastEditTime: 2024-04-04 11:10:17
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -52,8 +52,8 @@ def cvLocatPng(allscreen, tpng):
 
 def calcenterpos(shapeA:list):
     assert len(shapeA) ==  4
-    x = (shapeA[0]+shapeA[2])
-    y = (shapeA[1]+shapeA[3])
+    x = (shapeA[0]+shapeA[2]) / 2
+    y = (shapeA[1]+shapeA[3]) / 2
     return (x,y)
 
 def cvLocatePngShape(allscreen, tpng):
@@ -108,6 +108,7 @@ def detect_color(image_path):
     
     # 计算灰度图像的平均亮度值
     mean_brightness = cv.mean(gray_image)[0]
+    log.debug("均度值：{}".format(mean_brightness))
     # print(mean_brightness)
     # 判断图像是白色还是灰色
     if mean_brightness > 100:  # 这里的阈值200可以根据实际情况调整

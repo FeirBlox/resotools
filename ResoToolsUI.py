@@ -15,6 +15,7 @@ from utils.GameExceptions import *
 from utils.cvTools import *
 
 from game.ResoGame import ResoadbObj
+from game.ResoGoodsCal import *
 
 class TkinterLogHandler:
     def __init__(self, text_widget):
@@ -201,25 +202,19 @@ class WinMan():
         # self.ctl.init(self)
         
     def global_click_count(self, evt):
-        if evt.num == 1:
-            try:
-                clickclass = evt.widget.winfo_class().lower()
-                if "button" not in clickclass:
-                    return
-            except Exception as e:
-                return             
-            clicktime = getNowTime()
-            clickname = evt.widget.cget("text")  # 获取点击控件的名称
-            if clickname == self.lattest_leftclick_name and (clicktime - self.lattest_leftclick_time) < 60:
-                self.resoobj.adb_obj.reconnect()
-            
-            log.info("亲，在为您在准备【{}】了，请勿频繁点击哟~~~~~".format(clickname))
-            
-            self.lattest_leftclick_time = clicktime
-            self.lattest_leftclick_name = clickname
+        clicktime = getNowTime()
+        clickname = evt.widget.cget("text")  # 获取点击控件的名称
+        if clickname == self.lattest_leftclick_name and (clicktime - self.lattest_leftclick_time) < 60:
+            self.resoobj.adb_obj.reconnect()
+        
+        log.info("亲，在为您在准备【{}】了，请勿频繁点击哟~~~~~".format(clickname))
+        
+        self.lattest_leftclick_time = clicktime
+        self.lattest_leftclick_name = clickname
         
         
     def btnAutoStart(self, evt):
+        self.global_click_count(evt)
         if evt.num == 1:
             if self.leftclick_autocruise_num % 2 == 0:
                 self.threadObjs.startNewThread(self.resoobj.autoDetectExcute, "autoxunhang")
@@ -236,6 +231,7 @@ class WinMan():
     #     self.winui.tk_button_btnAutoStop.config(state=DISABLED)
     
     def fgtHundunXB(self, evt):
+        self.global_click_count(evt)
         if evt.num == 1:
             if self.leftclick_fgtHundunXB_num % 2 == 0:
                 self.threadObjs.startNewThread(self.resoobj.fightFloatTree, "hundunxb")
@@ -246,6 +242,7 @@ class WinMan():
             self.leftclick_fgtHundunXB_num += 1
             
     def btnAutoIronSecurity(self, evt):
+        self.global_click_count(evt)
         if evt.num == 1:
             if self.leftclick_tieanju_num % 2 == 0:
                 self.threadObjs.startNewThread(self.resoobj.autoIronSecurity, "autoIronSecurity")
@@ -255,6 +252,7 @@ class WinMan():
             self.leftclick_tieanju_num += 1
             
     def btnAutoRunBusiness(self,evt):
+        self.global_click_count(evt)
         startcity = self.winui.tk_select_box_startcity.get()
         endcity = self.winui.tk_select_box_endcity.get()
         
@@ -265,10 +263,13 @@ class WinMan():
                 self.threadObjs.startNewThread(self.resoobj.autoRunningBusiness, "autoRunBusiness", startcity, endcity)
             else:
                 self.threadObjs.killTthread("autoRunBusiness")
-            self.leftclick_tieanju_num += 1        
+            self.leftclick_tieanju_num += 1   
+            
+    def __timeThread(self):
+        self.threadObjs.startNewTimeThread(301, staticResoGoodCal.getGoodsinfo, "updategoods")     
     
     def __event_bind(self):
-        self.winui.bind_all("<Button-1>", self.global_click_count)
+        # self.winui.bind_all("<Button-1>", self.global_click_count)
         self.winui.tk_button_btnAutoStart.bind('<Button-1>', self.btnAutoStart)
         # self.winui.tk_button_btnAutoStop.bind('<Button-1>', self.btnAutoStop)
         self.winui.tk_button_fgtHundunXB.bind('<Button-1>', self.fgtHundunXB)
@@ -285,6 +286,7 @@ class WinMan():
         
     def start(self):
         self.__event_bind()
+        self.__timeThread()
         self.winui.mainloop()
 
 

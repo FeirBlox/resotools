@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-08 22:12:54
 LastEditors: Achetair
-LastEditTime: 2024-03-30 17:48:00
+LastEditTime: 2024-04-04 11:14:29
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -75,6 +75,7 @@ class ADB():
         # 点击坐标
         shell_cmd = [self.adb_path, "-s", self.ip_addr, "shell", "input", "tap", str(point[0]), str(point[1])]
         # print(" ".join(shell_cmd))
+        # log.info()
         run(shell_cmd, shell=True) 
     
     # 从结束移动到开始

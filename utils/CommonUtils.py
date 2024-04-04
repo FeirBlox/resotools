@@ -18,16 +18,32 @@ import json
 import datetime
 import shutil
 import re
+from collections import Counter
+
+def getPhraseRepchar(phraselist:list)->dict:
+    ret_info = {}
+    # 计算每个短语的代表字
+    representative_chars = []
+    for phrase in phraselist:
+        # 统计短语中每个字的出现频率
+        char_count = Counter(phrase)
+        # 选择出现频率最高的字作为代表字
+        representative_char = char_count.most_common(1)[0][0]
+        representative_chars.append(representative_char)
+        
+        ret_info[representative_char] = phrase
+    return ret_info
 
 def getNowTime():
     return time.time()
 
-def getNowTimeFormat():
+def getNowTimeFormat(format="%Y-%m-%d %H:%M:%S", offhours=0):
     # 获取当前时间
     current_time = datetime.datetime.now()
-
+    time_difference = datetime.timedelta(hours=offhours)
+    new_time = current_time + time_difference
     # 将时间格式化为年月日时分秒格式
-    formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")    
+    formatted_time = new_time.strftime(format)    
     return formatted_time
     
 
@@ -139,10 +155,19 @@ class threadsManager():
         self.threadsinfo = {}
         self.white_list = []
         
+        self.timeThreadInfo = {}
+        
     def __checkOtherThread(self):
         for k,v in self.threadsinfo.items():
             if k not in self.white_list:
                 self.killTthread(k)
+                
+    def startNewTimeThread(self, tn, func, recordName, *args):
+        # self.__checkOtherThread()
+        newThread = threading.Timer(tn, func, args=args)
+        self.timeThreadInfo[recordName] = newThread
+        newThread.daemon = True
+        newThread.start()        
     
     def startNewThread(self, func, recordName, *args):
         self.__checkOtherThread()
