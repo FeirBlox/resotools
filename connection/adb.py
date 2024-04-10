@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-08 22:12:54
 LastEditors: Achetair
-LastEditTime: 2024-04-04 11:14:29
+LastEditTime: 2024-04-09 22:48:42
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -71,9 +71,12 @@ class ADB():
         takeShootrun.wait()
         # print("模拟器 截图完成")
         
-    def clickPosition(self, point=(0,0)):
+    def clickPosition(self, point=(0,0), off=(0,0)):
+        x = point[0] + off[0]
+        y = point[1] + off[1]
+        
         # 点击坐标
-        shell_cmd = [self.adb_path, "-s", self.ip_addr, "shell", "input", "tap", str(point[0]), str(point[1])]
+        shell_cmd = [self.adb_path, "-s", self.ip_addr, "shell", "input", "tap", str(x), str(y)]
         # print(" ".join(shell_cmd))
         # log.info()
         run(shell_cmd, shell=True) 

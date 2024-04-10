@@ -9,6 +9,10 @@ Description:
 
 import sys
 import os
+
+from sympy import EX
+
+from game.ResoActivity import ResoActivity0322
 sys.path.append(os.path.dirname(os.getcwd()))
 
 import subprocess
@@ -22,6 +26,7 @@ from utils.CommonUtils import *
 from utils.GameExceptions import *
 from utils.cvTools import *
 
+from game.ResoGoodsCal import staticResoGoodCal
 from game.ResoGame import ResoadbObj
 
 DATA_TMP_DIR = "tmp"
@@ -39,14 +44,33 @@ def getFrontWindowInfo():
 if __name__ == "__main__":
     systemInit()
     # print(os.getcwd())
-    A = ResoadbObj()
-    A.setAdbInfo("127.0.0.1", "16384", os.path.join(os.getcwd(),"connection/adb.exe"), "tmp" )
-    # A.dispatchOcrCenter()
-    # A.takeTestTabShoot("cengmingdubuzu.png")
-    A.fightFloatTree()
-    # img_path = "D:/work/resotools/tmp/test-ResoadbObj/kaishijiemian.png"
-    # A.takeTabShoot()
-    # rrr = A.ocr.ocr_characters(A.adb_obj.screenshoot_path, "澄明度不足")
-    # rrr = A.ocr.ocr_img(A.adb_obj.screenshoot_path)
-    # A.adb_obj.clickPosition(rrr[1])
-    # print(rrr)
+    
+    # global staticResoGoodCal
+    
+
+
+    self = ResoadbObj()
+    self.setAdbInfo("127.0.0.1", "16384", os.path.join(os.getcwd(),"connection/adb.exe"), "tmp" )
+    # self.takeTestTabShoot("mairujiaoyi2.png")
+    # self.takeTabShoot()
+    
+    # 当前城市
+    self.tmpcityDes = "阿妮塔能源研究所"
+    # staticResoGoodCal.store_time = getNowTime()
+    # staticResoGoodCal.updateInfo()
+    # self.tmpbestRunningRoute = staticResoGoodCal.cityGoodsProfitCal()
+    # buyinfo = self.tmpbestRunningRoute[1].get(self.tmpcityDes)
+    # products = buyinfo[0]
+    # book_num = buyinfo[1]
+    # self.buyandsell(buyinfo, 1|2)
+    # self._buy(products, book_num)
+    self.autoRunningBusiness(2)
+
+    
+    
+     
+    
+    
+            
+
+    

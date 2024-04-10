@@ -18,10 +18,10 @@ from cnocr import CnOcr
 from resotools.game.ABSObj import *
 from resotools.utils.cvTools import *
 from resotools.utils.ocrtools import Ocr_tools
+from resotools.game.ResoGoodsCal import staticResoGoodCal as resocal
 
 from game.ResoGoodsCal import City
 
-    
     
 class ResoCityGraph():
     def __init__(self) -> None:
@@ -90,7 +90,14 @@ class ResoadbObj(ABSadbObj):
             "弹丸数量":[1585, 1036, 1645, 1058],
             "商会城市名称":[1345.0, 335.0, 1688.0, 369.0],
             "载货量":[1758.0, 581.0, 1810.0, 608.0],
-            "卖出":[1500.0, 945.0, 1642.0, 998.0]
+            "疲劳值":[1446, 28, 1494, 54],
+            "卖出":[1500.0, 945.0, 1642.0, 998.0],
+            "全部卖出":[1718,133,1865,178],
+            "讲价":[1657,665,1865,726],
+            "幅度":[1489,676,1581,713],
+            "采购书数量1":[907, 541, 940, 578],
+            "采购书+1":[1197,539,1280,622],
+            "货物区域":[715,197,1289,1037]
         }
         self.gameFlag = {
             "自动战斗":False,
@@ -323,12 +330,12 @@ class ResoadbObj(ABSadbObj):
         rc = 0
         while(True):
             self.takeTabShoot(1)
-            if lf & 1 != 1:
+            if lf & 1 == 0:
                 state = self.clickPictureEvent("blackcheksymbol.png")
                 if state is not None:
                     lf = lf | 1
                     continue
-            if lf & 2 != 2:
+            if lf & 2 == 0:
                 state = self._ocr_click("skip")
                 if state is not None:
                     lf = lf | 2
@@ -394,7 +401,9 @@ class ResoadbObj(ABSadbObj):
         assert cityname in self.city_list
         self.tmpcityDes = cityname
         
-    def searchTargetCity(self, tocity):
+    def searchTargetCityinMap(self, tocity):
+        log.info("列车将开往:{}".format(tocity))
+        
         centPoint = Point(860, 540)
         # 点击地图
         self.takeTabShoot()
@@ -444,7 +453,52 @@ class ResoadbObj(ABSadbObj):
                 return
 
         raise Exception
+    
+    def __bargainProfit(self):
+        # 讨论相关的交易幅度
+        bargain_per = 0
+        fail_bar = 0
+        success_bar = 0
+        while True:
+            xm = "讲价"
+            self.adb_obj.clickPosition(calcenterpos(self.pos_data[xm]))
+            time.sleep(3)       
+            self.takeTabShoot()
+            xm = "幅度"
+            # self.takeTabShoot()
+            part_pic = self.cutPartPic(self.pos_data[xm])
+            state = self.ocr.ocr_img(part_pic)
+            if state is not None:
+                msg = state[0].get("text")
+                if "%" in msg:
+                    t_per = float(msg.replace("%", ""))
+                    if t_per <= bargain_per:
+                        # log.info("讲价失败")
+                        fail_bar += 1
+                    else:
+                        bargain_per = t_per
+                        success_bar += 1
+                    if t_per >= 15.5:
+                        break
+            if (fail_bar + success_bar) >= 6:
+                break
+                            
+        log.info("当前讲价的幅度为：{}%, 失败{}次， 成功{}次。".format(bargain_per, fail_bar, success_bar))
         
+    def testbbb(self):
+        # self.__bargainProfit()
+        return self.__getNowCargoCapacity()
+        
+    def __getNowCargoCapacity(self):
+        # 检查载货量
+        xm_name = "载货量"
+        part_pic = self.cutPartPic(self.pos_data[xm_name])
+        state = self.ocr.ocr_number(part_pic)
+        if state is None:
+            state = 0
+            # raise ResoNoBankFound
+        log.info("目前载货量：{}/{} ".format(state, resocal.huowu_capacity))
+        return state
     
     def _sell(self):
         self.takeTabShoot()
@@ -452,95 +506,113 @@ class ResoadbObj(ABSadbObj):
         time.sleep(2)
         
         # 检查载货量
-        xm_name = "载货量"
         self.takeTabShoot()
-        part_pic = self.cutPartPic(self.pos_data[xm_name])
-        state = self.ocr.ocr_number(part_pic)
+        state = self.__getNowCargoCapacity()
         if state is None:
             raise ResoNoBankFound
         if (state <= 20):
             log.info("当前货量：{}， 货物已经卖出，开始买！".format(state))
             return  
-        log.info("目前载货量：{}/530， 开始卖货".format(state))
-        
+        self.__bargainProfit()
         state = self._ocr_tabshoot("全部")
         if state is None:
             raise Exception
         self.adb_obj.clickPosition(state[1])
         time.sleep(1)
-        state = self._ocr_tabshoot("卖出", True)[-1]
-
-
-        self.adb_obj.clickPosition(state[1])
-        time.sleep(3)
-        self._clickBlank()
+        nn = 0
+        while True:
+            state = self._ocr_tabshoot("卖出", True)[-1]
+            self.adb_obj.clickPosition(state[1])
+            time.sleep(3)
+            self._clickBlank()
+            self.takeTabShoot()
+            state = self.locateTpicture("talktothebusinessman.png")
+            if state is not None:
+                break
+            nn += 1
+            if nn >= 5:
+                raise Exception
 
         
     def _clickBlank(self):
         center = (983, 1014)
         self.adb_obj.clickPosition(center)
-    
-    def _buy(self):
-        # state = self.clickPictureEvent("fanhui.png","返回")
-        # if state is None:
-        #     raise Exception
-        log.info("我要买！买！买！买！")
-        repeat_num = 0
-        while(True):
-            self.takeTabShoot()
-            state = self.locateTpicture("buy.png")
-            if state is None:
-                # 重新进入交易所
-                if repeat_num == 0:
-                    state = self.clickPictureEvent("fanhui.png","返回")
-                if repeat_num >= 1:
-                    log.info("未发现买入图片，重新进入城市进行查找")
-                    # 重新进入城市
-                    time.sleep(1)
-                    self.backToCityHome()
-                    time.sleep(1)
-                    # 重新进入交易所
-                    self.stepToBusiness()
-
-                if repeat_num >= 3:
-                    raise Exception
-                repeat_num += 1
-            else:
-                self.adb_obj.clickPosition(state)
-                break
-                    
-        time.sleep(2)       
         
-        # 检查载货量
-        xm_name = "载货量"
-        self.takeTabShoot()
+    def __getFatigueValue(self):
+        xm_name = "疲劳值"
         part_pic = self.cutPartPic(self.pos_data[xm_name])
         state = self.ocr.ocr_number(part_pic)
         if state is None:
             state = 0
-        if (state >= 200):
-            log.info("卖货不成功！")
+        if (state >= 700):
+            log.info("疲劳值过高，不宜交易")
             raise Exception
-        repeat_num = 1
-
-        state = self._ocr_tabshoot("全部")
-        if state is None:
-            raise Exception
-        self.adb_obj.clickPosition(state[1])
-        time.sleep(1)        
-        state = self._ocr_tabshoot("买入", True)[-1]
-        self.adb_obj.clickPosition(state[1]) 
-
-        time.sleep(3)
-        self._clickBlank()
+        log.info("当前疲劳值为: {}".format(state))
+    
+    def _buy(self, products, booknum, cvl=0):
+        # cvl = 4| 2| 1
+        # state = self.clickPictureEvent("fanhui.png","返回")
+        # if state is None:
+        #     raise Exception
+        log.info("将要买入：{}".format(", ".join(products)))
+        repeat_num = 0
+        while True:
+            self.takeTabShoot()
+            if cvl & 1 == 0:
+                # 进入买入界面
+                self.takeTabShoot()
+                state = self.locateTpicture("buy.png")
+                if state is not None:
+                    self.adb_obj.clickPosition(state)
+                    cvl = cvl | 1
+            
+            if cvl & 2 == 0:
+                self.takeTabShoot()
+                state = self.__getNowCargoCapacity()
+                if (state >= 200):
+                    log.info("卖货不成功！")
+                    raise Exception
+                self.__usePurchaseBook(booknum)
+                cvl = cvl | 2
+            
+            if cvl & 4 == 0:
+                self.takeTabShoot()
+                self._selectProducts(products)
+                cvl = cvl | 4
+            
+            if cvl & 8 == 0:
+                self.takeTabShoot()
+                self.__bargainProfit()
+                cvl = cvl | 8
+            
+            if cvl & 16 ==0:
+                self.takeTabShoot()
+                state = self._ocr_tabshoot("买入", isStrict=True)
+                if state is not None:
+                    cpos = state[-1][1]
+                    self.adb_obj.clickPosition(cpos)
+                time.sleep(4) 
+                self._clickBlank()     
+                
+            state = self._ocr_tabshoot("买入", isStrict=True)
+            if state is not None:
+                cvl = 8 | 4 | 2 | 1
+                continue
+                
+            state = self.locateTpicture("talktothebusinessman.png")
+            if state is not None:
+                break
+        log.info("买入交易完成......")
+                  
         
     
     def stepToBusiness(self):
         log.info("交易所，I'm coming ~~~~~~~")
-        time.sleep(2)
+        # time.sleep(2)
         repeat_num = 0
         while(True):
             self.takeTabShoot()
+            time.sleep(2)
             state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "交易所")
             if state is not None:
                 pos = state[1]
@@ -563,12 +635,25 @@ class ResoadbObj(ABSadbObj):
                 log.error("没有发现交易所")
                 raise ResoNoBankFound        
         
-    def buyandsell(self):
-        self.stepToBusiness()
-        time.sleep(1)
-        self._sell()
-        time.sleep(1)
-        self._buy()
+    def buyandsell(self, buyinfo, current_level = 0):
+        products = buyinfo[0]
+        book_num = buyinfo[1]
+        while current_level & 4 == 0:
+            try:
+                if current_level & 1 == 0:
+                    self.takeTabShoot()
+                    self.stepToBusiness()
+                    current_level = current_level | 1
+                if current_level & 2 == 0:
+                    self.takeTabShoot()
+                    self._sell()
+                    current_level = current_level | 2
+                if current_level & 4 == 0:
+                    self.takeTabShoot()
+                    self._buy(products, book_num)
+                    current_level = current_level | 4
+            except ResoNoBankFound as e:
+                continue
         
     def _ocr_tabshoot(self, characs, isStrict=False, picName=None):
         if picName is None:
@@ -594,42 +679,175 @@ class ResoadbObj(ABSadbObj):
             pos = state[1]
             self.adb_obj.clickPosition(pos)
         return state            
-                    
-    def autoRunningBusiness(self, city1, city2, current_level = 8):
+                
+    
+    def __usePurchaseBook(self, booknum):
+        if booknum == 0:
+            return 
+        cvl = 0
+        cor_shape = None
+        while True:
+            if cvl & 1 == 0:
+                state = self._ocr_click("使用道具")
+                self.takeTabShoot()
+                state = self._ocr_tabshoot("进货采买书")
+                if state is None:
+                    raise Exception
+                l = int(state[1][0] - 200)
+                t = int(state[1][1] - 50)
+                r = int(state[1][0] + 400)
+                b = int(state[1][1] + 50)
+                cor_shape = [l,t,r,b]
+                cvl = cvl | 1
+            if cvl & 2 == 0:
+                t_name = self.cutPartPic(cor_shape)
+                state = self._ocr_tabshoot("使用", picName=t_name)
+                if state is not None:
+                    x = state[1][0] + cor_shape[0]
+                    y = state[1][1] + cor_shape[1]
+                    self.adb_obj.clickPosition((x,y))
+                    cvl = cvl | 2
+            if cvl & 4 == 0:
+                self.takeTabShoot()
+                xm = "采购书数量1"
+                t_name = self.cutPartPic(self.pos_data[xm])
+                state = self.ocr.ocr_number(t_name)
+                if state is not None:
+                    if booknum == state:
+                        state = self._ocr_click("确认")
+                        if state is None:
+                            raise Exception
+                        else:
+                            time.sleep(4)
+                            break
+                    else:
+                        xm = "采购书+1"
+                        self.adb_obj.clickPosition(calcenterpos(self.pos_data[xm]))
+                else:
+                    raise Exception
+                
+    def _selectProducts(self, products):
+        start_pos = [1135,595]
+        end_pos = [1142,447]
+        # tmpgoods = []
+        tmpgoods = products.copy()
+        global resocal
+        # resocal.store_time = getNowTime()
+        # resocal.updateInfo()
+        # citysells = resocal.cityGraphs.getCitySellProducts(self.tmpcityDes)
+        # phf = list(citysells.keys())
+        # corr_word_goods = getPhraseRepchar(phf)
+        # for k,v in corr_word_goods.items():
+        #     if "None" in k:
+        #         if v in citysells:
+        #             tmpgoods.append(v)
+        #     else:
+        #         if v in citysells:
+        #             tmpgoods.append(k)
+                      
+        while True:
+            self.takeTabShoot()
+            xm = "货物区域"
+            t_name = self.cutPartPic(self.pos_data[xm])
+            off = self.pos_data[xm][:2]
+            for good in tmpgoods:
+                state = self._ocr_tabshoot(good, picName=t_name)
+                # print(state, good)
+                if state is not None:
+                    self.adb_obj.clickPosition(state[1], off=off)
+                    tmpgoods.remove(good)
+                    time.sleep(1)
+
+            for good in tmpgoods:
+                state = self._ocr_tabshoot(good, picName=t_name)
+                # print(state, good)
+                if state is not None:
+                    self.adb_obj.clickPosition(state[1], off=off)
+                    tmpgoods.remove(good)
+                    time.sleep(1)                    
+
+            self.takeTabShoot()
+            nowcapacity = self.__getNowCargoCapacity()
+            if nowcapacity >=700:
+                break
+            if len(tmpgoods) == 0:
+                break
+            self.adb_obj.swipePosition(start_pos, end_pos)
+        log.info("{} 采购：{}".format(self.tmpcityDes, ", ".join(products)))
+        
+    
+    def autoRunningBusiness(self, current_level = 0):
+        log.info("当前跑商，默认最高收益，主页设置没有效果")
+        global resocal
+        # print(resocal.store_time)
+        resocal.store_time = getNowTime()
+        resocal.updateInfo()
+        # repnum = 0
          # 判断当前所在的城市
-        if self.tmpcityDes == "":
-            self.tmpcityDes = city1
-            
-        dstcity = ""
-        if self.tmpcityDes == city1:
-            # 当前城市是 city1
-            dstcity = city2
-        else:
-            dstcity = city1
-            assert self.tmpcityDes == city2
-            
-        srccity = self.tmpcityDes
+        # if self.tmpcityDes == "":
+        #     self.tmpcityDes = city1            
         while(True):
+            if resocal.canUpdateTime():
+                resocal.updateInfo()
+            # 计算最优路线  等级 10000001
+            self.tmpbestRunningRoute = resocal.cityGoodsProfitCal()            
+            citynames = list(self.tmpbestRunningRoute[1].keys())
+            # 如果当前的城市不在最优解当中
+            # if self.tmpcityDes not in citynames and (current_level & 1 == 0):
+            if self.tmpcityDes not in citynames :
+                # log.info("最优城市发生变化，将变更路线：{}".format("<==>".join(citynames)))
+                log.warning("最优路线发生变化，由玩家自行决定，计算最佳路线为：{}".format("<==>".join(citynames)))
+                cityAinfo = resocal.get2CityProfit(self.tmpcityDes, citynames[0])
+                cityBinfo = resocal.get2CityProfit(self.tmpcityDes, citynames[1])
+                if cityAinfo[0] > cityBinfo[0]:
+                    buyinfo = cityAinfo[1:]
+                    citynames.remove(citynames[1])
+                else:
+                    buyinfo = cityBinfo[1:]
+                    citynames.remove(citynames[0])
+                # raise BestCityChangeWarning
+                # current_level =1
+                
+            # 设置当前城市
             try:
-                if current_level >= 7:
-                    self.searchTargetCity(dstcity)
-                if current_level >= 5:
+                citynames.remove(self.tmpcityDes)
+            except ValueError:
+                pass
+            dstcity = citynames[0]
+            srccity = self.tmpcityDes
+            if current_level & 1 == 0:
+                buyinfo = self.tmpbestRunningRoute[1].get(dstcity)
+            log.info("买入信息：{}".format(buyinfo))
+            try:
+                if current_level & 2 == 0:
+                    self.searchTargetCityinMap(dstcity)
+                    current_level =  current_level | 2
+                if current_level & 4 == 0:
                     self.autoCruise()
                     self.stepToCity() 
+                    current_level = current_level | 4
                 # 进入城市,交易所
-                if current_level >= 3:
-                    self.buyandsell()
+                if current_level & 8 == 0:
+                    
+                    self.buyandsell(buyinfo)
+                    current_level = current_level | 8
                 # 交换目的地和开始位置
-                dstcity = srccity
-                srccity = self.tmpcityDes
-                current_level = 8
+                # dstcity = srccity
+                # srccity = self.tmpcityDes
+                self.tmpcityDes = dstcity
+                
+                current_level = 0
+                # repnum += 1
+                # if repnum >= 4:
+                #     break
             except ResoDesCityNotFound as e:
                 log.error("目的地：{} 没有找到".format(dstcity))
+                current_level = 1
                 continue
             except ResoNoBankFound as e:
                 log.error("城市：{} 未找到交易所".format(self.tmpcityDes))
                 self.backToCityHome()
-                current_level = 4
+                current_level = 3
                 continue
             
     
@@ -718,59 +936,74 @@ class ResoadbObj(ABSadbObj):
         isDisCertain = False
         distance = 1000
         destination = ""
+        
+        cvl = 0
          
         while(True):
             time.sleep(1)
             self.takeTabShoot()
-            # 获取剩余里程，目的地
-            state = self.ocr.ocr_mutitext(self.adb_obj.screenshoot_path, ["剩余行程", "目的地"])
+            if cvl & 1 == 0:
+                # 获取剩余里程，目的地
+                state = self.ocr.ocr_mutitext(self.adb_obj.screenshoot_path, ["剩余行程", "目的地"])
+                if state is not None:
+                    if state.get("剩余行程") is not None:
+                        tmpdis = state["剩余行程"]["text"]
+                        # tdis = 
+                        distance = getTextNumber(tmpdis)
+                    # print("距离")
+                    if not isDisCertain and state.get("目的地") is not None:
+                        destination = state["目的地"]["text"].split("：")[-1]
+                        if destination in self.city_list:
+                            self.tmpcityDes = destination
+                            log.info("本次旅途的目的地为:{}".format(self.tmpcityDes))
+                            isDisCertain = True
+                    log.info("距离[{}]还有[{}]km".format(destination, distance))
 
-            if state is not None:
-                if state.get("剩余行程") is not None:
-                    tmpdis = state["剩余行程"]["text"]
-                    # tdis = 
-                    distance = getTextNumber(tmpdis)
-                # print("距离")
-                if not isDisCertain and state.get("目的地") is not None:
-                    destination = state["目的地"]["text"].split("：")[-1]
-                    if destination in self.city_list:
-                        self.tmpcityDes = destination
-                        isDisCertain = True
-                log.info("距离[{}]还有[{}]km".format(destination, distance))
+            
+            # if cvl & 2 == 0:
+            #     xm_name = "自动巡航"
+            #     part_pic = self.cutPartPic(self.pos_data[xm_name])
+            #     state = self.ocr.ocr_characters(part_pic, xm_name)
                 
-            xm_name = "自动巡航"
-            part_pic = self.cutPartPic(self.pos_data[xm_name])
-            state = self.ocr.ocr_characters(part_pic, xm_name)
             # state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "自动巡航")
+            
+            state = self.locateTpicture("fighting.png")
+            if state is not None:
+                cvl = 1 
+                time.sleep(5)
+                continue
+            else:
+                cvl  = 0
+                
 
-            if state is not None:
-                # 还在自动巡航中
-                repeat_num = 0
-                xm_name = "弹丸数量"
-                self.takeTabShoot()
-                part_pic = self.cutPartPic(self.pos_data[xm_name])
-                state = self.ocr.ocr_number(part_pic)
-                if state is None:
-                    # 正在加速中
-                    state = self.ocr.ocr_characters(part_pic, "加速")
-                    if state is not None:
-                        log.info("亲，列车正在加速中~～(￣▽￣～)(～￣▽￣)～~")
-                        time.sleep(3)
-                        continue
-                else:
-                    # 点击加速弹丸
-                    if distance >= 50 and state != 0:
-                        self.clickPictureEvent("jiasudanwan.png",name="加速弹丸", num=1)
-                    else:
-                        log.info("距离[{}]太近，停止使用加速弹丸".format(destination))
-                    log.info("加速弹丸数量剩余：{}/7".format(state))
-                    continue
+            # if state is not None:
+            #     # 还在自动巡航中
+            #     repeat_num = 0
+            #     xm_name = "弹丸数量"
+            #     self.takeTabShoot()
+            #     part_pic = self.cutPartPic(self.pos_data[xm_name])
+            #     state = self.ocr.ocr_number(part_pic)
+            #     if state is None:
+            #         # 正在加速中
+            #         state = self.ocr.ocr_characters(part_pic, "加速")
+            #         if state is not None:
+            #             log.info("亲，列车正在加速中~～(￣▽￣～)(～￣▽￣)～~")
+            #             time.sleep(3)
+            #             continue
+            #     else:
+            #         # 点击加速弹丸
+            #         if distance >= 50 and state != 0:
+            #             self.clickPictureEvent("jiasudanwan.png",name="加速弹丸", num=1)
+            #         else:
+            #             log.info("距离[{}]太近，停止使用加速弹丸".format(destination))
+            #         log.info("加速弹丸数量剩余：{}/7".format(state))
+            #         continue
                     
-            state = self.clickPictureEvent("huweiduiyingji.png", name="护卫队袭击", num=1)
-            if state is not None:
-                log.info("(ｷ｀ﾟДﾟ´)!! 被野怪袭击！！！干他！！！")
-                repeat_num = 0
-                self.waitMissionEnd()
+            # state = self.clickPictureEvent("huweiduiyingji.png", name="护卫队袭击", num=1)
+            # if state is not None:
+            #     log.info("(ｷ｀ﾟДﾟ´)!! 被野怪袭击！！！干他！！！")
+            #     repeat_num = 0
+            #     self.waitMissionEnd()
 
             state = self.locateTpicture("jinruzhandian.png")
             if state is not None:
@@ -778,13 +1011,13 @@ class ResoadbObj(ABSadbObj):
                 self.stepToCity()
                 return
                 
-            repeat_num += 1
-            if repeat_num >=num:
-                state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "自动巡航")
-                if state is None:
-                    log.info("意外，退出自动巡航的状态")
-                    return
-                repeat_num = 0
+            # repeat_num += 1
+            # if repeat_num >=num:
+            #     state = self.ocr.ocr_characters(self.adb_obj.screenshoot_path, "自动巡航")
+            #     if state is None:
+            #         log.info("意外，退出自动巡航的状态")
+            #         return
+            #     repeat_num = 0
                 
     def fightFloatTree(self, funm=5):
         if funm:
@@ -881,7 +1114,9 @@ class ResoadbObj(ABSadbObj):
                     if color == "grey":
                         log.info("自动战斗开启")
                         self.adb_obj.clickPosition(calcenterpos(self.pos_data["自动战斗"]))
-                    self.gameFlag["自动战斗"] = True    
+                    else:
+                        self.gameFlag["自动战斗"] = True  
+                        
                 endTime = getNowTime()
                 if int(endTime - s_start_time) % 30 <= 5:         
                     log.info("游戏还没有结束请等待......")
@@ -899,8 +1134,9 @@ class ResoadbObj(ABSadbObj):
             repeat_count += 1
             if repeat_count >= num:
                 time.sleep(1)
-                log.info("出现意外退出循环")   
-                raise FightUnexpectException
+                log.info("出现意外退出循环")  
+                return  
+                # raise FightUnexpectException
             
         endTime = getNowTime()
         log.info("作战结束, 持续时间 {}s".format(endTime - s_start_time))
@@ -922,10 +1158,6 @@ class ResoadbObj(ABSadbObj):
                     }
         return None
                     
-    # def enterGame(self):
-        
-
-        
     
 if __name__ == "__main__":
     A = ResoadbObj()

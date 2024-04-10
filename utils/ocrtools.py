@@ -10,17 +10,24 @@ from cnocr import CnOcr
 from resotools.utils.CommonUtils import *
 from resotools.utils.UserLog import obj_log as log
 
-MODEL_ROOT = "D:/work/resotools"
+MODEL_ROOT = os.getcwd()
 
-class Ocr_tools():
-    def __init__(self,det_model_name="ch_PP-OCRv3_det", rec_model_name= "densenet_lite_114-fc", det_root="model/cnstd", rec_root="model/cnocr", number=False, start=True) -> None:
-        det_root, rec_root = os.path.join(MODEL_ROOT, det_root), os.path.join(MODEL_ROOT, rec_root)
+# class Ocr_tools():
+#     def __init__(self,det_model_name="ch_PP-OCRv3_det", rec_model_name= "densenet_lite_114-fc", det_root="model/cnstd", rec_root="model/cnocr", number=False, start=True) -> None:
+#         det_root, rec_root = os.path.join(MODEL_ROOT, det_root), os.path.join(MODEL_ROOT, rec_root)
         
-        # print("det_root: {}, rec_root:{}".format(det_root, rec_root))
-        rec_vocab_path = os.path.join(MODEL_ROOT, "model/cnocr/label_cn.txt")
-        self.ocr = CnOcr(det_model_name=det_model_name, rec_model_name=rec_model_name, rec_vocab_fp=rec_vocab_path, det_root=det_root, rec_root=rec_root) 
-        self.number_ocr = CnOcr(det_model_name=det_model_name, rec_model_name="en_number_mobile_v2.0", det_root=det_root, rec_root=rec_root, cand_alphabet='0123456789.+%')
-    
+#         # print("det_root: {}, rec_root:{}".format(det_root, rec_root))
+#         rec_vocab_path = os.path.join(MODEL_ROOT, "model/cnocr/label_cn.txt")
+        
+#         self.ocr = CnOcr(det_model_name=det_model_name, rec_model_name=rec_model_name, rec_vocab_fp=rec_vocab_path, det_root=det_root, rec_root=rec_root) 
+        
+#         self.number_ocr = CnOcr(det_model_name=det_model_name, rec_model_name="en_number_mobile_v2.0", det_root=det_root, rec_root=rec_root, cand_alphabet='0123456789.+%')
+class Ocr_tools():
+    def __init__(self, rec_root="models/cnocr", det_root = "models/cnstd") -> None:
+        
+        det_root, rec_root = os.path.join(MODEL_ROOT, det_root), os.path.join(MODEL_ROOT, rec_root) 
+        
+        self.ocr = CnOcr(rec_root = rec_root, det_root = det_root)        
     
     '''
     description: 识别图片中的文字
@@ -72,7 +79,7 @@ class Ocr_tools():
         return [left, top, right, bottom]
     
     def ocr_number(self, img_path):
-        result = self.number_ocr.ocr_for_single_line(img_path)
+        result = self.ocr.ocr_for_single_line(img_path)
         text = result["text"]
         if text == "":
             return None

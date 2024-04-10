@@ -22,16 +22,37 @@ from collections import Counter
 
 def getPhraseRepchar(phraselist:list)->dict:
     ret_info = {}
-    # 计算每个短语的代表字
+    char_counts = {}
+    for phrase in phraselist:
+        char_counts[phrase] = Counter(phrase)
+
+    # 提取每个短语的代表字
     representative_chars = []
     for phrase in phraselist:
-        # 统计短语中每个字的出现频率
-        char_count = Counter(phrase)
-        # 选择出现频率最高的字作为代表字
-        representative_char = char_count.most_common(1)[0][0]
-        representative_chars.append(representative_char)
+        sorted_chars = sorted(char_counts[phrase].items(), key=lambda x: x[1], reverse=True)
+        unique_char = None
+        for char, count in sorted_chars:
+            # 检查当前字是否在其他短语中出现过
+            char_used = False
+            for other_phrase in phraselist:
+                if other_phrase != phrase and char in char_counts[other_phrase]:
+                    char_used = True
+                    break
+            if not char_used:
+                unique_char = char
+                break
+        representative_chars.append(unique_char)
         
-        ret_info[representative_char] = phrase
+    # 输出每个短语的代表字
+    nonenum = 0
+    for phrase, char in zip(phraselist, representative_chars):
+        # print(f"短语 '{phrase}' 的代表字是 '{char}'")
+        if char is None:
+            tname = "None{}".format(nonenum)
+            nonenum += 1
+            ret_info[tname] = phrase
+        else:
+            ret_info[char] = phrase
     return ret_info
 
 def getNowTime():
@@ -116,6 +137,12 @@ def getTextNumber(text):
     except Exception as e:
         log.error("触发匹配失败：{}".format(text))
         return 500
+
+# 定时线程
+def execute_periodically(func, interval):
+    while True:
+        func()
+        time.sleep(interval)
     
 class Point:
     def __init__(self, x=0, y=0):
@@ -164,10 +191,10 @@ class threadsManager():
                 
     def startNewTimeThread(self, tn, func, recordName, *args):
         # self.__checkOtherThread()
-        newThread = threading.Timer(tn, func, args=args)
+        newThread = threading.Thread(target=execute_periodically, args=(func, tn, *args))
         self.timeThreadInfo[recordName] = newThread
         newThread.daemon = True
-        newThread.start()        
+        newThread.start()     
     
     def startNewThread(self, func, recordName, *args):
         self.__checkOtherThread()

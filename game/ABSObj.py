@@ -2,7 +2,7 @@
 Author: Achetair
 Date: 2024-03-08 23:29:25
 LastEditors: Achetair
-LastEditTime: 2024-03-29 18:38:19
+LastEditTime: 2024-04-03 19:53:04
 Description: 
 '''
 #-*- config:utf-8 -*-
@@ -80,9 +80,9 @@ class ABSadbObj():
         self.adb_obj.setScreenShoot(tmpstore_path)
         self.tmpstore_path = tmpstore_path
         
-    def takeTabShoot(self):
+    def takeTabShoot(self, tn=1):
         # 截图前停顿1s,防止出错
-        time.sleep(1)
+        time.sleep(tn)
         self.adb_obj.takeScreenShoot()
         
     # 快照测试用的文件    
